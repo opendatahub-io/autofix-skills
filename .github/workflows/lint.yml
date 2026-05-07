@@ -1,0 +1,96 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SKILL.md frontmatter
+        run: |
+          errors=0
+          for skill_file in skills/*/SKILL.md; do
+            [ -f "$skill_file" ] || continue
+            if ! head -1 "$skill_file" | grep -q '^---$'; then
+              echo "ERROR: $skill_file missing YAML frontmatter"
+              errors=$((errors + 1))
+            fi
+            name=$(sed -n '/^---$/,/^---$/{ /^name:/p }' "$skill_file" | head -1)
+            if [ -z "$name" ]; then
+              echo "ERROR: $skill_file missing 'name' in frontmatter"
+              errors=$((errors + 1))
+            fi
+            desc=$(sed -n '/^---$/,/^---$/{ /^description:/p }' "$skill_file" | head -1)
+            if [ -z "$desc" ]; then
+              echo "ERROR: $skill_file missing 'description' in frontmatter"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "Found $errors frontmatter errors"
+            exit 1
+          fi
+          echo "All SKILL.md files have valid frontmatter"
+
+      - name: Validate hooks.json syntax
+        run: |
+          if [ -f hooks/hooks.json ]; then
+            python3 -c "import json; json.load(open('hooks/hooks.json'))" || {
+              echo "ERROR: hooks/hooks.json is not valid JSON"
+              exit 1
+            }
+            echo "hooks.json is valid JSON"
+          else
+            echo "No hooks.json found (OK for initial setup)"
+          fi
+
+      - name: Validate plugin.json
+        run: |
+          python3 -c "
+          import json, sys
+          data = json.load(open('.claude-plugin/plugin.json'))
+          required = ['name', 'version', 'description']
+          missing = [k for k in required if k not in data]
+          if missing:
+              print(f'ERROR: plugin.json missing fields: {missing}')
+              sys.exit(1)
+          print('plugin.json is valid')
+          "
+
+      - name: Check prompt file references
+        run: |
+          errors=0
+          for skill_dir in skills/*/; do
+            skill_file="$skill_dir/SKILL.md"
+            [ -f "$skill_file" ] || continue
+            prompts_dir="$skill_dir/prompts"
+            if grep -q 'prompts/' "$skill_file" && [ ! -d "$prompts_dir" ]; then
+              echo "ERROR: $skill_file references prompts/ but directory does not exist"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "Found $errors missing prompt directories"
+            exit 1
+          fi
+          echo "All prompt references are valid"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Lint Python scripts
+        run: |
+          pip install ruff
+          if ls scripts/*.py 1>/dev/null 2>&1; then
+            ruff check scripts/
+            echo "Python scripts pass ruff"
+          else
+            echo "No Python scripts found (OK for initial setup)"
+          fi

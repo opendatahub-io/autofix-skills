@@ -1,0 +1,7 @@
+{
+  "name": "autofix-skills",
+  "version": "0.1.0",
+  "description": "Orchestrator skills, agent prompts, and state management for the Jira autofix pipeline",
+  "author": "opendatahub-io",
+  "homepage": "https://github.com/opendatahub-io/autofix-skills"
+}
