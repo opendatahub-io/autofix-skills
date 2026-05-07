@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/state.py dispatch-context tmp/orchestrator-state.yaml"
+          }
+        ]
+      }
+    ]
+  }
+}
