@@ -1,0 +1,63 @@
+# claudelint configuration for autofix-skills
+# https://github.com/stbenjam/claudelint
+
+rules:
+  # Plugin structure rules
+  plugin-json-required:
+    enabled: true
+    severity: error
+
+  plugin-json-valid:
+    enabled: true
+    severity: error
+
+  plugin-naming:
+    enabled: true
+    severity: warning
+
+  commands-dir-required:
+    enabled: false
+    severity: warning
+
+  commands-exist:
+    enabled: false
+    severity: info
+
+  plugin-readme:
+    enabled: true
+    severity: warning
+
+  # Command format rules
+  command-naming:
+    enabled: true
+    severity: warning
+
+  command-frontmatter:
+    enabled: true
+    severity: error
+
+  command-sections:
+    enabled: true
+    severity: warning
+
+  command-name-format:
+    enabled: true
+    severity: warning
+
+  # Marketplace rules (not applicable, this is a standalone plugin)
+  marketplace-json-valid:
+    enabled: false
+    severity: error
+
+  marketplace-registration:
+    enabled: false
+    severity: error
+
+  # Skills rules
+  skill-frontmatter:
+    enabled: true
+    severity: warning
+
+exclude: []
+
+strict: false

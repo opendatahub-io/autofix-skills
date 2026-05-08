@@ -1,7 +1,7 @@
 ---
 name: autofix-research
 description: >-
-  Research a Jira spike ticket with no associated repository.
+  Use when researching a Jira spike ticket with no associated repository.
   Investigates the topic and writes structured findings to
   autofix-output/.autofix-verdict.json.
 allowed-tools: Read Write Glob Grep

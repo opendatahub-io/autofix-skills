@@ -1,0 +1,97 @@
+# autofix-skills labels
+
+# Bug tracking
+- name: bug
+  description: Something isn't working
+  color: d73a4a
+
+# Enhancement and feature requests
+- name: enhancement
+  description: New feature or request
+  color: a2eeef
+
+# Documentation
+- name: documentation
+  description: Improvements or additions to documentation
+  color: 0075ca
+
+# Development workflow
+- name: tooling
+  description: Changes to build tools, CI/CD, or development workflow
+  color: 5319e7
+
+# Priority labels
+- name: priority-high
+  description: High priority issue or PR
+  color: b60205
+
+- name: priority-medium
+  description: Medium priority issue or PR
+  color: fbca04
+
+- name: priority-low
+  description: Low priority issue or PR
+  color: 0e8a16
+
+# Status labels
+- name: good first issue
+  description: Good for newcomers
+  color: 7057ff
+
+- name: help wanted
+  description: Extra attention is needed
+  color: 008672
+
+- name: needs-review
+  description: Requires review from maintainers
+  color: ededed
+
+- name: work-in-progress
+  description: Still being worked on
+  color: yellow
+
+- name: stale
+  description: No recent activity, may be closed
+  color: ededed
+
+- name: blocked
+  description: Blocked by external dependencies or issues
+  color: b60205
+
+- name: on-hold
+  description: Temporarily on hold, do not mark as stale
+  color: fbca04
+
+# Type of contribution
+- name: new-skill
+  description: Contribution adds a new skill
+  color: 006b75
+
+- name: new-script
+  description: Contribution adds a new script
+  color: 0e8a16
+
+- name: breaking-change
+  description: Introduces breaking changes
+  color: d93f0b
+
+# Special cases
+- name: duplicate
+  description: This issue or pull request already exists
+  color: cfd3d7
+
+- name: invalid
+  description: This doesn't seem right
+  color: e4e669
+
+- name: wontfix
+  description: This will not be worked on
+  color: ffffff
+
+- name: question
+  description: Further information is requested
+  color: d876e3
+
+- name: idea
+  description: Community idea or suggestion
+  color: f29e4c

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: autofix-skills documentation
+    url: https://github.com/opendatahub-io/autofix-skills
+    about: Plugin documentation and architecture guide
+  - name: ai-helpers marketplace
+    url: https://github.com/opendatahub-io/ai-helpers
+    about: Extension skills and the broader AI helpers ecosystem

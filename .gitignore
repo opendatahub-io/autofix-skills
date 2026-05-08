@@ -1,0 +1,29 @@
+# Editor and IDE
+.idea
+*.swp
+*.swo
+*~
+.vscode
+.envrc
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+*.egg
+
+# Claude Code local settings
+.claude/settings.local.json
+.mcp.json
+*.local.json
+
+# Working directories
+.work/
+
+# Logs
+*.log

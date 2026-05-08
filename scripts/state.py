@@ -166,7 +166,8 @@ def cmd_dispatch_context(state_file: Path) -> int:
         print("NEXT: Read .autofix-context/review-findings.json and decide:")
         print("  - critical/minor → iterate (call implement again)")
         print("  - nitpick/empty → proceed to verdict")
-        print(f"  - iteration {iteration}/{max_iterations} — {'can iterate' if iteration < max_iterations else 'HARD CAP REACHED'}")
+        cap_status = "can iterate" if iteration < max_iterations else "HARD CAP REACHED"
+        print(f"  - iteration {iteration}/{max_iterations} — {cap_status}")
     elif phase == "scan":
         if repos_remaining:
             next_repo = repos_remaining[0]
