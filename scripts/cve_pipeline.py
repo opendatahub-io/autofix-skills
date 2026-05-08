@@ -29,13 +29,17 @@ from pathlib import Path
 
 try:
     import yaml
+
     def _load(p: Path) -> dict:
         return yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+
     def _save(p: Path, d: dict) -> None:
         p.write_text(yaml.dump(d, default_flow_style=False, sort_keys=False), encoding="utf-8")
 except ImportError:
+
     def _load(p: Path) -> dict:
         return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+
     def _save(p: Path, d: dict) -> None:
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(d, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -43,14 +47,14 @@ except ImportError:
 
 # Valid state transitions
 TRANSITIONS = {
-    "parse":    {"parsed": "scan", "ignore": "finalize"},
-    "scan":     {"present": "route", "absent": "route", "scan_done": "finalize"},
-    "route":    {"fix": "fix", "vex": "vex", "skip": "scan"},
-    "fix":      {"fixed": "verify", "fix_failed": "scan"},
-    "verify":   {"verified": "review", "still_present": "scan", "verify_failed": "scan"},
-    "review":   {"approved": "pr", "rejected": "fix", "cap_reached": "pr"},
-    "vex":      {"justified": "scan", "needs_human": "scan"},
-    "pr":       {"created": "scan", "pr_failed": "scan"},
+    "parse": {"parsed": "scan", "ignore": "finalize"},
+    "scan": {"present": "route", "absent": "route", "scan_done": "finalize"},
+    "route": {"fix": "fix", "vex": "vex", "skip": "scan"},
+    "fix": {"fixed": "verify", "fix_failed": "scan"},
+    "verify": {"verified": "review", "still_present": "scan", "verify_failed": "scan"},
+    "review": {"approved": "pr", "rejected": "fix", "cap_reached": "pr"},
+    "vex": {"justified": "scan", "needs_human": "scan"},
+    "pr": {"created": "scan", "pr_failed": "scan"},
     "finalize": {},
 }
 
@@ -92,9 +96,6 @@ def get_next_action(state: dict) -> dict:
         }
     """
     phase = state.get("phase", "parse")
-    repos = state.get("repos", [])
-    current_repo_idx = state.get("current_repo_idx", -1)
-    current_branch_idx = state.get("current_branch_idx", -1)
 
     if phase == "parse":
         return {
