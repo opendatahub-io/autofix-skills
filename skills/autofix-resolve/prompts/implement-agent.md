@@ -48,9 +48,16 @@ Before committing, run the repo's lint, build, and test commands:
 
 ## Step 6: Commit
 
-- Stage and commit with the repo's required format (check `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md`)
-- Fallback format: `<TICKET-KEY>: <SUMMARY>`
-- Ensure the ticket key appears in the commit message
+**Staging — explicit files only:**
+- Stage ONLY the files you created or modified: `git add <file1> <file2> ...`
+- NEVER use `git add -A`, `git add .`, or `git add --all` — these stage every file in the working tree and can include unintended files (secrets, credentials, build artifacts).
+- Run `git status` after staging to verify only your intended files are staged.
+
+**Commit message format:**
+1. Check the target repo's `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, and commit message hooks for commit format conventions.
+2. If the repo specifies a format (e.g. Conventional Commits), follow it and include the ticket key where the format allows (trailer, scope, or body).
+3. If no conventions exist, use the fallback format: `<TICKET-KEY>: <SUMMARY>`
+4. Always ensure the ticket key appears somewhere in the commit message.
 
 ## Step 7: Write Verdict
 
