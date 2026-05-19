@@ -156,14 +156,14 @@ def cmd_dispatch_context(state_file: Path) -> int:
     # Dispatch instructions based on phase
     if phase == "implement":
         print(f"NEXT: Call the implement agent (iteration {iteration + 1}).")
-        print("Read .autofix-context/ticket.json for context.")
+        print("Read autofix-context/ticket.json for context.")
         if findings_count > 0:
-            print("Read .autofix-context/all-findings.json for findings to address.")
+            print("Read autofix-context/all-findings.json for findings to address.")
     elif phase == "review":
         print("NEXT: Call the review agent to check the implementation.")
-        print("It will write findings to .autofix-context/review-findings.json.")
+        print("It will write findings to autofix-context/review-findings.json.")
     elif phase == "evaluate":
-        print("NEXT: Read .autofix-context/review-findings.json and decide:")
+        print("NEXT: Read autofix-context/review-findings.json and decide:")
         print("  - critical/minor → iterate (call implement again)")
         print("  - nitpick/empty → proceed to verdict")
         cap_status = "can iterate" if iteration < max_iterations else "HARD CAP REACHED"
