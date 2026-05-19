@@ -106,7 +106,7 @@ outputs:
         "observations": ["Array of notable findings during implementation"]
       }
 
-  - path: .autofix-context
+  - path: autofix-context
     schema: |
       Intermediate files written during execution (not primary scoring artifacts):
       - review-findings.json: Array of findings from review agent. Each finding has:
