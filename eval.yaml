@@ -1,0 +1,245 @@
+name: autofix-skills
+description: End-to-end Jira ticket fix orchestration with implement/review loop
+skill: autofix-resolve
+
+# Execution — how the skill processes test cases
+execution:
+  mode: case
+  arguments: ""
+  timeout: 3600
+  max_budget_usd: 10.0
+
+# Runner — agent harness + runner-specific knobs
+runner:
+  type: claude-code
+  plugin_dirs:
+    - /home/stobin/git/autofix-skills
+
+# Models — defaults for each role (CLI flags override)
+models:
+  skill: claude-opus-4-6
+  judge: claude-opus-4-6
+  hook: claude-sonnet-4-6
+
+# Permissions for headless execution
+# The Skill tool requires explicit permission in headless mode.
+# autofix-resolve invokes implement-agent and review-agent via prompt files,
+# which may themselves invoke extension skills.
+permissions:
+  allow:
+    - "Skill"
+
+# MLflow logging target
+mlflow:
+  experiment: autofix-skills-eval
+
+# Dataset — describe what you actually observed in the sample case
+dataset:
+  path: eval/cases
+  schema: |
+    Each case directory contains:
+    - input.yaml: YAML file with 'ticket_key' (Jira ticket ID, e.g., "RHAISTRAT-1234")
+      and 'mode' (optional: "resolve" for fresh ticket or "iterate" for addressing review feedback).
+    - autofix-context/ticket.json: JSON file with ticket details:
+      - 'key': ticket ID
+      - 'summary': one-line issue description
+      - 'description': full ticket body with symptom, expected vs actual behavior
+      - 'labels': array of ticket labels
+      - 'priority': ticket priority (e.g., "Major", "Critical")
+    - autofix-context/config.json (optional): JSON file listing extension skills
+      to call at post_implement and post_review hook points. Schema:
+      - 'extra_skills': array of objects with 'name' (skill name) and 'hooks'
+        (array of hook points: "post_implement", "post_review")
+    - autofix-context/review-comments.json (iterate mode only): JSON array of
+      MR/PR reviewer comments. Each comment has 'file', 'line', 'comment' fields.
+    - autofix-context/ci-failures.json (iterate mode only): JSON array of CI
+      test failures. Each failure has 'test_name', 'error_message', 'log_excerpt'.
+    - CLAUDE.md or AGENTS.md or CONTRIBUTING.md (optional): Repo-specific
+      conventions the skill should follow when implementing fixes.
+    - annotations.yaml: Expected verdict, quality scores, and test metadata.
+
+# Inputs — tool interception for headless execution
+inputs:
+  tools:
+    - match: Questions asked to the user via AskUserQuestion
+      prompt: |
+        Answer based on the test case context in input.yaml and annotations.yaml.
+        For confirmation questions ("Should I proceed?"), answer "yes" unless
+        annotations.yaml explicitly says to decline.
+        For choice questions, pick the first option unless annotations.yaml
+        specifies a different choice.
+
+    - match: |
+        Any interaction with Jira — whether via MCP tools (mcp__atlassian__*)
+        or Bash scripts calling the Jira API.
+      prompt: |
+        Block all Jira API calls. The skill should operate on the static
+        autofix-context/ticket.json file provided in the test case, not
+        fetch live data from Jira.
+
+    - match: |
+        Git push operations via Bash (git push, git push --force-with-lease)
+      prompt: |
+        Block all git push operations. The skill should commit changes locally
+        but not push to remote repositories during evaluation.
+
+# Outputs — what the skill produces
+outputs:
+  - path: autofix-output
+    schema: |
+      Contains a single JSON file: `.autofix-verdict.json`
+
+      Schema:
+      {
+        "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|research|no_changes",
+        "reason": "Brief explanation of the verdict",
+        "summary": "One-line summary of what was done",
+        "files_changed": ["array", "of", "file", "paths"],
+        "risks": ["Array of potential risks or side effects"],
+        "blockers": ["Array of blocking issues if verdict is 'blocked'"],
+        "self_review_issues_found": null,
+        "self_review_issues_fixed": null,
+        "lint_passed": true|false|null,
+        "build_passed": true|false|null,
+        "tests_passed": true|false|null,
+        "upstream_consideration": "Notes on upstream fixes if applicable, or null",
+        "observations": ["Array of notable findings during implementation"]
+      }
+
+  - path: .autofix-context
+    schema: |
+      Intermediate files written during execution (not primary scoring artifacts):
+      - review-findings.json: Array of findings from review agent. Each finding has:
+        - 'severity': "critical" | "minor" | "nitpick"
+        - 'description': specific issue description
+        - 'file': file path where issue was found
+        - 'line': line number (optional)
+      - all-findings.json: Merged findings from review + extensions (created by merge_findings.py)
+      - extension-findings/<skill-name>.json: Per-extension findings (if extensions are configured)
+
+# Traces — execution data to capture for judges
+traces:
+  stdout: true
+  stderr: true
+  events: true
+  metrics: true
+
+# Judges — evaluate output quality
+judges:
+  - name: verdict_file_exists
+    description: Verify the final verdict file exists and is valid JSON at autofix-output/.autofix-verdict.json
+    check: |
+      import json
+      def judge(outputs):
+          path = outputs.get("files", {}).get("autofix-output/.autofix-verdict.json")
+          if not path:
+              return False, "Verdict file not found in outputs"
+          try:
+              verdict = json.loads(path)
+              if not isinstance(verdict, dict):
+                  return False, "Verdict is not a JSON object"
+              if "verdict" not in verdict or "summary" not in verdict:
+                  return False, "Verdict missing required fields (verdict, summary)"
+              valid_verdicts = {"committed", "already_fixed", "not_a_bug", "insufficient_info", "blocked", "research", "no_changes"}
+              if verdict["verdict"] not in valid_verdicts:
+                  return False, f"Invalid verdict value: {verdict['verdict']}"
+              return True, "Verdict file valid"
+          except json.JSONDecodeError as e:
+              return False, f"Verdict JSON parsing failed: {e}"
+
+  - name: verdict_consistency
+    description: Check that verdict fields are internally consistent (e.g., files_changed matches committed status)
+    check: |
+      import json
+      def judge(outputs):
+          verdict_content = outputs.get("files", {}).get("autofix-output/.autofix-verdict.json")
+          if not verdict_content:
+              return False, "No verdict file"
+          verdict = json.loads(verdict_content)
+          v = verdict.get("verdict")
+          files = verdict.get("files_changed", [])
+
+          if v == "committed" and not files:
+              return False, "Verdict 'committed' but files_changed is empty"
+          if v in ["already_fixed", "not_a_bug", "insufficient_info", "blocked", "research", "no_changes"] and files:
+              return False, f"Verdict '{v}' but files_changed is non-empty"
+
+          # If files changed, validation fields should be present
+          if files:
+              if verdict.get("lint_passed") is None and verdict.get("build_passed") is None and verdict.get("tests_passed") is None:
+                  return False, "Files changed but no validation status (lint/build/test)"
+
+          return True, "Verdict fields are consistent"
+
+  - name: implementation_quality
+    description: Assess whether the fix is correct, complete, and safe
+    prompt: |
+      Review the implementation verdict and code changes.
+
+      {{ outputs }}
+
+      Evaluate:
+      1. Does the fix actually address the ticket requirements stated in the summary and reason?
+      2. Are there obvious logic errors, missing error handling, or incomplete cases?
+      3. Were lint, build, and test steps appropriate and run correctly?
+      4. Is the change minimal and focused on the ticket, without scope creep?
+      5. Is the commit message clear and includes the ticket key?
+
+      Score:
+      1 - Fails ticket requirements or introduces bugs
+      2 - Partially addresses ticket, significant gaps or errors
+      3 - Addresses ticket basics, minor issues or incomplete validation
+      4 - Complete fix, well-validated, minor polish needed
+      5 - Excellent: correct, complete, minimal, well-validated
+
+  - name: review_findings_quality
+    description: Assess whether the review agent was rigorous and found real issues
+    prompt: |
+      Review the review-findings.json (if available) or note in the verdict observations.
+
+      {{ outputs }}
+
+      Evaluate:
+      1. Are the findings substantive and specific (e.g., "off-by-one at line 142") rather than generic?
+      2. Do critical findings address real logic errors, security risks, or missing requirements?
+      3. Were mechanical checks (debug prints, TODO markers, commented-out code) properly applied?
+      4. Does the finding severity assignment match the guidelines (critical = logic/security/missing requirement)?
+      5. If findings are empty, is there evidence in the code that validation actually happened?
+
+      Score:
+      1 - Rubber-stamped, missing obvious issues
+      2 - Superficial review, vague findings
+      3 - Adequate review, some mechanical checks applied
+      4 - Thorough review, specific findings, good severity assignment
+      5 - Rigorous: substantive findings, appropriate severity, comprehensive checks
+
+  - name: iteration_decision_correctness
+    description: Assess whether the orchestrator made correct decisions about when to iterate
+    prompt: |
+      Review the iteration history recorded in the verdict and state.
+
+      {{ outputs }}
+
+      {{ conversation }}
+
+      Evaluate:
+      1. Was iteration triggered only for critical or minor findings (not nitpick)?
+      2. Was iteration capped at 3 implement calls as documented?
+      3. When iteration cap was reached, did the orchestrator write a fallback verdict (blocked, insufficient_info)?
+      4. In multi-iteration runs, did findings from each review get addressed in the next implement call?
+
+      Score:
+      1 - Wrong iteration decisions, cap violated, or infinite loop
+      2 - Iteration logic has significant flaws
+      3 - Iteration logic mostly correct, minor issues
+      4 - Correct iteration decisions, cap respected
+      5 - Excellent: correct decisions throughout, findings properly addressed
+
+# Thresholds for regression detection
+thresholds:
+  implementation_quality:
+    min_mean: 3.5
+  review_findings_quality:
+    min_mean: 3.0
+  iteration_decision_correctness:
+    min_mean: 3.5
