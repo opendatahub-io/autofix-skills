@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/state.py dispatch-context tmp/orchestrator-state.yaml"
+            "command": "test -f tmp/dispatch-recovery.sh && bash tmp/dispatch-recovery.sh"
           }
         ]
       }

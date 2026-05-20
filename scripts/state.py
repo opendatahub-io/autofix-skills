@@ -54,18 +54,27 @@ def _save_state(path: Path, state: dict) -> None:
 
 def cmd_init(state_file: Path) -> int:
     """Initialize an empty state file."""
+    scripts_dir = str(Path(__file__).resolve().parent)
     initial = {
         "phase": "start",
         "ticket_key": "",
         "iteration": 0,
         "max_iterations": 3,
         "skill_name": "",
+        "scripts_dir": scripts_dir,
         "repos_processed": [],
         "repos_remaining": [],
         "findings_count": 0,
         "last_action": "",
     }
     _save_state(state_file, initial)
+
+    recovery_script = state_file.parent / "dispatch-recovery.sh"
+    recovery_script.write_text(
+        f'#!/bin/bash\npython3 "{scripts_dir}/state.py" dispatch-context "{state_file}"\n',
+        encoding="utf-8",
+    )
+
     print(f"Initialized state file: {state_file}")
     return 0
 
