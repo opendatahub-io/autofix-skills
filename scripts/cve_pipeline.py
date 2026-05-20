@@ -34,6 +34,7 @@ try:
         return yaml.safe_load(p.read_text(encoding="utf-8")) or {}
 
     def _save(p: Path, d: dict) -> None:
+        p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(yaml.dump(d, default_flow_style=False, sort_keys=False), encoding="utf-8")
 except ImportError:
 
@@ -260,6 +261,15 @@ def cmd_transition(state_file: Path, event: str) -> int:
 def cmd_init(state_file: Path) -> int:
     """Initialize a new CVE pipeline state file."""
     init_state(state_file)
+
+    scripts_dir = str(Path(__file__).resolve().parent)
+    recovery_script = state_file.parent / "dispatch-recovery.sh"
+    recovery_script.parent.mkdir(parents=True, exist_ok=True)
+    recovery_script.write_text(
+        f'#!/bin/bash\npython3 "{scripts_dir}/state.py" dispatch-context "{state_file}"\n',
+        encoding="utf-8",
+    )
+
     print(f"Initialized CVE pipeline state: {state_file}")
     return 0
 
