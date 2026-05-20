@@ -27,7 +27,7 @@ This plugin implements the **inner layer** of the autofix pipeline. The outer la
 
 **Prompt files** (`prompts/*.md`) are self-contained agent personas. Each defines a complete set of instructions for one task (implement a fix, review changes, scan for CVEs, etc.).
 
-**Scripts** handle all deterministic operations: JSON merging, state persistence, CVE routing decisions. The LLM calls these via `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.py` and reads the output.
+**Scripts** handle all deterministic operations: JSON merging, state persistence, CVE routing decisions. The LLM calls these via `python3 ${CLAUDE_SKILL_DIR}/../../scripts/<name>.py` and reads the output.
 
 ## Naming Convention
 
