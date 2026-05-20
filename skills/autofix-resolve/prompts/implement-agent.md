@@ -49,8 +49,8 @@ Before committing, run the repo's lint, build, and test commands:
 ## Step 6: Commit
 
 - Stage and commit with the repo's required format (check `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md`)
-- Fallback format: `<TICKET-KEY>: <SUMMARY>`
-- Ensure the ticket key appears in the commit message
+- Fallback format if no repo conventions exist: `<TICKET-KEY>: <SUMMARY>`
+- Do not add trailers (Signed-off-by, Co-Authored-By, etc.) unless the repo's conventions explicitly require them
 
 ## Step 7: Write Verdict
 
