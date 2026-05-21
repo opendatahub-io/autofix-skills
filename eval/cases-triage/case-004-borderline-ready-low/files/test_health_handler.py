@@ -20,8 +20,7 @@ def test_cached_check_returns_previous_result():
 def test_unhealthy_when_db_fails(monkeypatch):
     checker = HealthChecker(check_interval=0)
     monkeypatch.setattr(
-        checker, "_check_database",
-        lambda: (_ for _ in ()).throw(ConnectionError("db down"))
+        checker, "_check_database", lambda: (_ for _ in ()).throw(ConnectionError("db down"))
     )
     status, body = checker.handle_request()
     assert status == 503

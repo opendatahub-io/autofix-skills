@@ -1,7 +1,6 @@
 """Health check endpoint handler."""
 
 import time
-import threading
 
 
 class HealthChecker:

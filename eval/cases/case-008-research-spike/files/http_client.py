@@ -23,6 +23,7 @@ class HttpClient:
             Parsed JSON response.
         """
         import requests
+
         url = f"{self.base_url}/{path.lstrip('/')}"
         resp = requests.get(url, params=params, timeout=self.timeout)
         resp.raise_for_status()
@@ -39,6 +40,7 @@ class HttpClient:
             Parsed JSON response.
         """
         import requests
+
         url = f"{self.base_url}/{path.lstrip('/')}"
         resp = requests.post(
             url,

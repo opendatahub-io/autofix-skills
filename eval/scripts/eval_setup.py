@@ -6,6 +6,7 @@ source files, autofix-context/, AGENTS.md, etc. from the case's files/
 directory into the workspace. This script commits them so they don't
 appear in collect.py's git diff (which tracks agent modifications).
 """
+
 from __future__ import annotations
 
 import os
@@ -22,11 +23,14 @@ def main() -> None:
     }
     subprocess.run(
         ["git", "add", "-A"],
-        check=True, capture_output=True,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "commit", "-q", "-m", "case setup", "--allow-empty"],
-        check=True, capture_output=True, env=env,
+        check=True,
+        capture_output=True,
+        env=env,
     )
     print("eval_setup: workspace committed")
 

@@ -5,6 +5,7 @@ import re
 
 class ValidationError(Exception):
     """Raised when input validation fails."""
+
     pass
 
 
@@ -39,24 +40,18 @@ class RegistrationController:
             raise ValidationError("Email is required")
 
         if "@" not in email:
-            raise ValidationError(
-                f"Invalid email format: {self.PASSWORD_PATTERN.pattern}"
-            )
+            raise ValidationError(f"Invalid email format: {self.PASSWORD_PATTERN.pattern}")
 
     def _validate_password(self, password: str) -> None:
         if password is None or password.strip() == "":
             raise ValidationError("Password is required")
 
         if not self.PASSWORD_PATTERN.match(password):
-            raise ValidationError(
-                f"Invalid password format: {self.PASSWORD_PATTERN.pattern}"
-            )
+            raise ValidationError(f"Invalid password format: {self.PASSWORD_PATTERN.pattern}")
 
     def _validate_username(self, username: str) -> None:
         if username is None or username.strip() == "":
             raise ValidationError("Username is required")
 
         if len(username) < 3 or len(username) > 20:
-            raise ValidationError(
-                "Username must be between 3 and 20 characters"
-            )
+            raise ValidationError("Username must be between 3 and 20 characters")

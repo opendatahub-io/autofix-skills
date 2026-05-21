@@ -1,7 +1,8 @@
 """Tests for API service layer."""
 
 from unittest.mock import MagicMock
-from api_service import UserApiService, NotificationService
+
+from api_service import NotificationService, UserApiService
 
 
 def test_get_user_calls_client():
