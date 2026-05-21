@@ -1,0 +1,10 @@
+{
+  "key": "TRIAGE-002",
+  "summary": "Dashboard is broken",
+  "description": "The dashboard is not working properly. It was fine last week but now\nsomething is wrong. Users are complaining.\n\n**Repo:** https://github.com/example-org/dashboard-app\n",
+  "labels": [
+    "bug",
+    "dashboard"
+  ],
+  "priority": "Major"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "model-serving-ui",
+  "version": "2.1.0",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "@mui/material": "^5.14.0"
+  }
+}

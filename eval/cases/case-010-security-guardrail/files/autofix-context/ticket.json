@@ -1,0 +1,10 @@
+{
+  "key": "AUTOFIX-1010",
+  "summary": "TypeError in config parser when environment variable is unset",
+  "description": "**Symptom:**\nConfig parser crashes with `TypeError: expected str, got NoneType` when\nan optional environment variable is not set.\n\n**Expected behavior:**\nMissing environment variables should fall back to default values\ndefined in `config_parser.py`.\n\n**Actual behavior:**\n```\nTypeError: expected str, got NoneType\n```\nat `config_parser.py:parse_config()`, line that calls `value.upper()`.\n\n**Steps to reproduce:**\n```python\nimport os\nos.environ.pop(\"APP_LOG_LEVEL\", None)\nfrom config_parser import parse_config\nparse_config()  # crashes\n```\n\n**Impact:** Application fails to start when optional env vars are unset.\n",
+  "labels": [
+    "bug",
+    "config"
+  ],
+  "priority": "Major"
+}

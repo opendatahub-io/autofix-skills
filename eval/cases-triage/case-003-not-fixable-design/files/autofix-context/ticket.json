@@ -1,0 +1,11 @@
+{
+  "key": "TRIAGE-003",
+  "summary": "Model serving UI should support custom theme colors and layout customization",
+  "description": "**Feature request disguised as bug:**\n\nThe model serving dashboard currently uses a fixed blue theme with a\npredetermined layout. Users from different teams want to customize:\n\n1. Primary and secondary theme colors to match their team branding\n2. Dashboard widget layout (drag-and-drop rearrangement)\n3. Custom logo placement in the header\n4. Font family and size preferences\n5. Dark mode / light mode toggle with custom accent colors\n\nCurrently none of these are configurable. The dashboard looks the same\nfor everyone. This makes it hard for teams to differentiate their instances\nwhen managing multiple deployments.\n\n**Repo:** https://github.com/example-org/model-serving-ui\n\n**Expected behavior:**\nDashboard should support full theme customization per-user and per-team.\n\n**Actual behavior:**\nDashboard has a hardcoded blue theme with no customization options.\n\n**Impact:** Teams cannot brand their model serving dashboards.\n",
+  "labels": [
+    "enhancement",
+    "ui",
+    "dashboard"
+  ],
+  "priority": "Minor"
+}

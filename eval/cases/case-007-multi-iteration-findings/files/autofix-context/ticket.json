@@ -1,0 +1,11 @@
+{
+  "key": "AUTOFIX-1007",
+  "summary": "CSV export produces malformed output with special characters",
+  "description": "**Symptom:**\nThe CSV export function produces malformed files when field values contain\ncommas, double quotes, or newlines. Downstream consumers reject the file.\n\n**Expected behavior:**\nFields containing special characters should be properly quoted per RFC 4180:\n- Fields with commas, quotes, or newlines are wrapped in double quotes\n- Double quotes within fields are escaped by doubling them\n\n**Actual behavior:**\n- Commas in values split a single field across multiple columns\n- Double quotes in values corrupt the row structure\n- Newlines in values create phantom rows\n\n**Steps to reproduce:**\n```python\nfrom csv_export import CsvExporter\nexporter = CsvExporter()\nexporter.add_row({\"name\": 'O\"Brien', \"city\": \"New York, NY\", \"bio\": \"Line1\\nLine2\"})\nprint(exporter.export())\n```\n\n**Impact:** Data export is unusable for any dataset with real-world text.\n",
+  "labels": [
+    "bug",
+    "data-export",
+    "csv"
+  ],
+  "priority": "Critical"
+}

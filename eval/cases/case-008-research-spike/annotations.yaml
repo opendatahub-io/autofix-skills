@@ -1,0 +1,9 @@
+expected_verdict: "research"
+expected_files_changed_count: 0
+notes: |
+  This is a research/spike ticket. The skill should recognize the
+  "[Spike]" label and explicit "no code changes" directive, and
+  produce a 'research' verdict with analysis findings but zero
+  code modifications. Tests the research verdict path in
+  autofix-resolve. The verdict should include observations about
+  the feasibility of the async migration.

@@ -1,0 +1,14 @@
+expected_verdict: "insufficient_info"
+expected_files_changed_count: 0
+expected_validation:
+  lint_passed: null
+  build_passed: null
+  tests_passed: null
+notes: |
+  Tests the skill's ability to recognize when a ticket lacks sufficient detail.
+  The ticket description is extremely vague with no specific metrics,
+  reproduction steps, or component identification.
+  Expected behavior: skill should recognize this and return "insufficient_info"
+  verdict with clear explanation of what's missing.
+  Should document: need specific page, metrics, profiling data, environment.
+  Should NOT make speculative changes.

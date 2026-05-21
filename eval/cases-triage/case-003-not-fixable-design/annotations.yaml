@@ -1,0 +1,20 @@
+expected_verdict: "not_fixable"
+expected_gates:
+  gate1: pass
+  gate2: pass
+  gate3: fail
+expected_gate3_reason: "requires_design_decisions"
+notes: |
+  Tests the skill's ability to recognize a feature request that requires
+  UX design decisions, not a simple bug fix. The ticket:
+  - Has a repo URL and clear description (Gate 1 passes)
+  - Code is locatable (theme.ts, DashboardLayout.tsx) and the "fix direction"
+    is technically stated (Gate 2 may pass)
+  - BUT the changes require significant design decisions:
+    - Color palette selection and contrast ratios
+    - Layout system design (grid? slots? free-form?)
+    - Theme persistence strategy (user prefs? team config?)
+    - Dark mode color scheme design
+  Gate 3 should fail with requires_design_decisions.
+  The message_to_opener should explain that this is a feature requiring
+  UX design decisions, not a bug that can be auto-fixed.

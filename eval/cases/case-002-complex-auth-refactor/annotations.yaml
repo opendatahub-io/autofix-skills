@@ -1,0 +1,13 @@
+expected_verdict: "committed"
+expected_files_changed_count: 2-3  # auth_token_service.py, test_auth_token_service.py, possibly token_validator.py
+expected_validation:
+  lint_passed: true
+  build_passed: true
+  tests_passed: true
+notes: |
+  Bug: generate_token() uses time.time_ns() (nanoseconds) but
+  is_token_valid() compares against time.time() (seconds). The fix
+  should change generate_token() to use time.time() so both sides
+  use the same unit.
+  Must add tests for time-based edge cases.
+  Python environment allows pytest to run and validate the fix.

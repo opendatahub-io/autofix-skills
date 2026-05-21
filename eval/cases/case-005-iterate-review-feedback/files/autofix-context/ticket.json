@@ -1,0 +1,12 @@
+{
+  "key": "AUTOFIX-1005",
+  "summary": "Add input validation for user registration endpoint",
+  "description": "**Requirement:**\nAdd comprehensive input validation to the user registration module.\n\n**Validation rules needed:**\n1. Email must be valid format and not already registered\n2. Password must be at least 8 characters, contain uppercase, lowercase,\n   and digit\n3. Username must be 3-20 alphanumeric characters\n4. All fields are required\n\n**Expected behavior:**\n- Raise `ValidationError` with specific error messages for failures\n- Return successfully for valid registration\n- Ensure error messages don't expose sensitive information\n\n**Acceptance criteria:**\n- All validation rules implemented\n- Unit tests for each validation rule\n- Error messages are clear and actionable\n\n**Impact:** Security and data quality improvement.\n",
+  "labels": [
+    "feature",
+    "api",
+    "validation",
+    "security"
+  ],
+  "priority": "Major"
+}

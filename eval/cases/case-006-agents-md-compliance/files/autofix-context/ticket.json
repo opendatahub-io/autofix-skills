@@ -1,0 +1,11 @@
+{
+  "key": "AUTOFIX-1006",
+  "summary": "Pagination returns wrong item count on last page",
+  "description": "**Symptom:**\nThe `get_page()` function in `pagination.py` returns one fewer item than\nexpected on the last page when the total item count is not evenly divisible\nby the page size.\n\n**Expected behavior:**\n`get_page([1,2,3,4,5], page=2, page_size=3)` should return `[4, 5]`.\n\n**Actual behavior:**\nReturns `[4]` -- the last item is silently dropped.\n\n**Steps to reproduce:**\n```python\nfrom pagination import get_page\nprint(get_page([1,2,3,4,5], page=2, page_size=3))\n# Expected: [4, 5]\n# Actual:   [4]\n```\n\n**Root cause:**\nLikely an off-by-one in the end-index calculation for the last page slice.\n\n**Impact:** Data loss in any paginated API response where total items\nare not a multiple of page size.\n",
+  "labels": [
+    "bug",
+    "pagination",
+    "data-loss"
+  ],
+  "priority": "Major"
+}

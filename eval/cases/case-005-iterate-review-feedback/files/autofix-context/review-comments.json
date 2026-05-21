@@ -1,0 +1,22 @@
+[
+  {
+    "file": "registration_controller.py",
+    "line": 28,
+    "comment": "The password validation regex only checks for lowercase letters and numbers. The requirement specifies it must also contain uppercase letters. Current regex: `r'[a-z0-9]{8,}'` should use lookaheads: `r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$'`"
+  },
+  {
+    "file": "registration_controller.py",
+    "line": 43,
+    "comment": "Email duplicate check is vulnerable to race condition. Two concurrent requests with the same email could both pass validation. Consider using a unique constraint on the database level or implementing optimistic locking."
+  },
+  {
+    "file": "test_registration_controller.py",
+    "line": 55,
+    "comment": "Missing test case for username with special characters (should be rejected). Only testing valid usernames and length violations."
+  },
+  {
+    "file": "registration_controller.py",
+    "line": 33,
+    "comment": "Error message for invalid password exposes the regex pattern to users. Should provide a user-friendly message like 'Password must contain uppercase, lowercase, and a digit' instead of showing the technical regex."
+  }
+]

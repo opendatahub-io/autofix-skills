@@ -1,0 +1,17 @@
+expected_verdict: "needs_info"
+expected_gates:
+  gate1: fail
+  gate2: fail
+  gate3: pass
+notes: |
+  Tests the skill's ability to recognize a vague, uninformative ticket.
+  The description lacks:
+  - What specifically is broken (which dashboard page? what error?)
+  - Any error messages, logs, or stack traces
+  - Specific reproduction steps
+  - Expected vs actual behavior details
+  Gate 1 should fail on bug_description: "dashboard is broken" is too
+  vague to identify what the actual problem is.
+  Gate 2 should also fail: no code locatability signal and no fix direction.
+  The message_to_opener should ask for specific page, error messages,
+  and reproduction steps.

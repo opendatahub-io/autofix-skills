@@ -1,0 +1,12 @@
+{
+  "key": "AUTOFIX-1002",
+  "summary": "Authentication tokens expire immediately after login",
+  "description": "**Symptom:**\nUsers report being logged out immediately after successful login.\nAuthentication tokens appear to expire within seconds instead of the\nconfigured 24-hour lifetime.\n\n**Expected behavior:**\nAuthentication tokens should remain valid for 24 hours after issuance.\n\n**Actual behavior:**\nTokens expire within 1-60 seconds of issuance, causing immediate\nre-authentication requests.\n\n**Investigation notes:**\n- Token generation uses `time.time()` which returns seconds\n- Configuration specifies token lifetime in seconds: 86400 (24 hours)\n- Suspected issue: expiration timestamp calculation may be using wrong\n  time unit \u2014 `time.time_ns()` returns nanoseconds but the validator\n  compares against `time.time()` (seconds)\n- Affects both web and mobile clients\n\n**Files potentially involved:**\n- auth_token_service.py (token generation)\n- token_validator.py (expiration checking)\n- config.py (configuration)\n\n**Impact:** Critical - users cannot maintain sessions.\n",
+  "labels": [
+    "bug",
+    "security",
+    "authentication",
+    "critical"
+  ],
+  "priority": "Critical"
+}
