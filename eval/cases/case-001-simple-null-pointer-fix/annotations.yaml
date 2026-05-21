@@ -1,0 +1,11 @@
+expected_verdict: "committed"
+expected_files_changed_count: 2  # user_profile.py + test_user_profile.py
+expected_validation:
+  lint_passed: true
+  build_passed: true
+  tests_passed: true
+notes: |
+  Simple None-check fix - should be straightforward to implement.
+  Expected fix: add None check before calling .strip() on phone_number.
+  Should add test case for None phone number scenario.
+  Python environment allows pytest to run and validate the fix.

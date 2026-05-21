@@ -1,0 +1,25 @@
+expected_verdict: "committed"
+expected_files_changed_count: 2  # registration_controller.py + test_registration_controller.py
+expected_validation:
+  lint_passed: true
+  build_passed: true
+  tests_passed: true
+iteration_expectation: |
+  This case tests the iterate mode and iteration decision logic.
+  The review comments identify 4 issues:
+  1. Password regex missing uppercase check (CRITICAL - breaks requirement)
+  2. Race condition in email validation (MINOR - architectural note)
+  3. Missing test case for special chars in username (MINOR - coverage gap)
+  4. Error message exposes regex pattern (MINOR - UX issue)
+
+  Expected behavior:
+  - Should address all review findings
+  - CI failure confirms the password regex issue
+  - Should NOT exceed 3 iterations
+
+  Tests iteration_decision_correctness judge.
+notes: |
+  Tests the full iterate mode pipeline with actual review feedback.
+  The password regex issue is a clear logic error that should trigger
+  re-implementation. All 4 review comments should be addressable.
+  Python environment allows pytest to run and validate the fixes.

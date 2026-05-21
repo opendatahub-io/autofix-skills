@@ -1,0 +1,11 @@
+{
+  "key": "TRIAGE-001",
+  "summary": "NullPointerException in UserProfile.formatPhoneNumber when phone is null",
+  "description": "**Symptom:**\nApplication crashes with NullPointerException when accessing user profile for\nusers who registered without providing a phone number.\n\n**Expected behavior:**\nProfile page should display gracefully with 'N/A' for missing phone number.\n\n**Actual behavior:**\nApplication throws:\n```\njava.lang.NullPointerException: Cannot invoke \"String.isEmpty()\" because \"phoneNumber\" is null\n    at com.example.user.UserProfile.formatPhoneNumber(UserProfile.java:27)\n    at com.example.user.UserProfile.getContactInfo(UserProfile.java:47)\n```\n\n**Repo:** https://github.com/example-org/user-service\n\n**Steps to reproduce:**\n1. Create user account without phone number (leave field blank)\n2. Navigate to /profile\n3. Application crashes with NPE\n\n**Impact:** Users without phone numbers cannot access their profile page.\n",
+  "labels": [
+    "bug",
+    "backend",
+    "user-management"
+  ],
+  "priority": "Major"
+}

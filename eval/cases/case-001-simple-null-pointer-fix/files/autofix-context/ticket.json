@@ -1,0 +1,11 @@
+{
+  "key": "AUTOFIX-1001",
+  "summary": "AttributeError in user profile when phone number is None",
+  "description": "**Symptom:**\nApplication crashes with AttributeError when accessing user profile for\nusers without a phone number set.\n\n**Expected behavior:**\nProfile should display gracefully with 'N/A' for missing phone number.\n\n**Actual behavior:**\nApplication throws:\n```\nAttributeError: 'NoneType' object has no attribute 'strip'\n```\nin `user_profile.py` at `format_phone_number()`.\n\n**Reproduction:**\n1. Create user account without phone number\n2. Call `get_contact_info()`\n3. Application crashes\n\n**Impact:** Users without phone numbers cannot access their profile.\n",
+  "labels": [
+    "bug",
+    "backend",
+    "user-management"
+  ],
+  "priority": "Major"
+}

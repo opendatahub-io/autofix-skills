@@ -1,0 +1,19 @@
+expected_verdict: "committed"
+check_agents_md_compliance: true
+ticket_key: "AUTOFIX-1006"
+expected_files_changed_count: 3  # pagination.py, test_pagination.py, CHANGELOG.md
+expected_validation:
+  lint_passed: null
+  build_passed: null
+  tests_passed: null
+notes: |
+  Tests AGENTS.md directive compliance, not implementation difficulty.
+  The bug is trivial (off-by-one: `end = start + page_size - 1` should
+  be `end = start + page_size`). The real test is whether the skill:
+  1. Uses the required commit message format: [AUTOFIX-1006] fix(scope): desc
+  2. Avoids wildcard imports in any new/modified Python files
+  3. Names new test functions as test_<func>_<scenario>_<expected>
+  4. Adds docstrings to any new public functions
+  5. Adds a changelog entry under ## Unreleased
+
+  The agents_md_compliance judge checks all five rules deterministically.

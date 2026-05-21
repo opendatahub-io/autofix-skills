@@ -1,0 +1,7 @@
+[
+  {
+    "test_name": "test_password_validation_uppercase_required",
+    "error_message": "AssertionError: ValidationError not raised",
+    "log_excerpt": "FAILED test_registration_controller.py::test_password_validation_uppercase_required - Password 'password123' should have been rejected for missing uppercase letter but was accepted"
+  }
+]

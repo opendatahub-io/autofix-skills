@@ -1,0 +1,14 @@
+expected_verdict: "already_fixed"
+expected_files_changed_count: 0
+expected_validation:
+  lint_passed: null
+  build_passed: null
+  tests_passed: null
+notes: |
+  Tests the skill's ability to detect that an issue is already resolved.
+  The code already validates email format with a regex and raises
+  ValidationError("Invalid email format") — exactly what the ticket asks.
+  Existing tests confirm the behavior. The ticket hints PR #456 may
+  have addressed this.
+  Expected: skill investigates, finds existing fix, returns "already_fixed".
+  Should NOT make any code changes.

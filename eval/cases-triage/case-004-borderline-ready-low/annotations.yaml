@@ -1,0 +1,23 @@
+expected_verdict: "ready"
+expected_confidence: "low"
+expected_gates:
+  gate1: pass
+  gate2: partial
+  gate3: pass
+notes: |
+  Borderline case testing the calibration bias toward "ready".
+  The triage rubric says: "prefer ready with confidence: low over
+  not_fixable when uncertain."
+
+  The ticket has:
+  - Gate 1 passes: repo URL present, specific behavior described
+  - Gate 2 is borderline: the race condition is described but the
+    exact fix path is uncertain (could be locking, caching, or
+    refactoring). Code is locatable but fix direction is ambiguous.
+  - Gate 3 passes: this is a code-level bug, not a design or
+    infrastructure issue
+
+  The expected result is "ready" with confidence "low" — the agent
+  should prefer giving the autofix bot a chance rather than declaring
+  not_fixable when there IS code to fix, even if the approach is
+  uncertain.

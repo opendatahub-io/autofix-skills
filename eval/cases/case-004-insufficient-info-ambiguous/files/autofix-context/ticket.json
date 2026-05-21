@@ -1,0 +1,10 @@
+{
+  "key": "AUTOFIX-1004",
+  "summary": "Performance issue in dashboard",
+  "description": "**Symptom:**\nThe dashboard is slow.\n\n**Expected behavior:**\nDashboard should load quickly.\n\n**Actual behavior:**\nIt's taking a long time.\n\n**Steps to reproduce:**\nJust go to the dashboard.\n\n**Impact:** Users are complaining.\n",
+  "labels": [
+    "performance",
+    "dashboard"
+  ],
+  "priority": "Minor"
+}

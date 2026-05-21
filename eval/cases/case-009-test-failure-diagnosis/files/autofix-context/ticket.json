@@ -1,0 +1,11 @@
+{
+  "key": "AUTOFIX-1009",
+  "summary": "test_calculate_discount fails after pricing rule update",
+  "description": "**Symptom:**\nThe test `test_calculate_discount_percentage` in `test_pricing.py` is\nfailing on the main branch after a recent pricing rule change.\n\n**Test failure output:**\n```\nFAILED test_pricing.py::test_calculate_discount_percentage\nAssertionError: assert 22.5 == 25.0\n```\n\nThe `calculate_discount()` function in `pricing.py` computes the wrong\ndiscount amount when the discount percentage exceeds the item's\nmax_discount_pct cap.\n\n**Expected behavior:**\nWhen a requested discount of 25% exceeds an item's `max_discount_pct` of\n15%, the function should cap the discount at 15% and return 15.0 (for a\n$100 item). Instead it applies a partial average of the two rates.\n\n**Root cause (suspected):**\nThe discount capping logic averages the requested and max rates instead\nof simply clamping to the max.\n\n**Impact:** Customers are receiving incorrect discounts on capped items.\n",
+  "labels": [
+    "bug",
+    "pricing",
+    "test-failure"
+  ],
+  "priority": "Critical"
+}

@@ -1,0 +1,11 @@
+{
+  "key": "TRIAGE-004",
+  "summary": "Intermittent 503 errors on /api/health endpoint under concurrent load",
+  "description": "**Symptom:**\nThe `/api/health` endpoint occasionally returns HTTP 503 instead of 200\nwhen multiple monitoring probes hit it simultaneously. This causes false\nalerts in our monitoring system.\n\n**Expected behavior:**\nThe health endpoint should always return 200 with a JSON status body,\nregardless of concurrent access.\n\n**Actual behavior:**\nUnder concurrent requests (>5 simultaneous), approximately 10% of\nrequests get 503 responses.\n\n**Repo:** https://github.com/example-org/service-monitor\n\n**Suspected root cause:**\nThe health check handler reads a shared `_last_check` timestamp without\nsynchronization. Under concurrent access, a race condition causes one\nthread to see a stale timestamp and return 503 (thinking the service is\nunhealthy). However, the exact race path is unclear \u2014 it could be a\ncaching issue, a lock contention issue, or something else entirely.\n\n**Steps to reproduce:**\n1. Start the service\n2. Run `ab -n 100 -c 10 http://localhost:8080/api/health`\n3. Observe ~10% of requests returning 503\n\n**Impact:** False monitoring alerts creating alert fatigue.\n",
+  "labels": [
+    "bug",
+    "reliability",
+    "race-condition"
+  ],
+  "priority": "Major"
+}
