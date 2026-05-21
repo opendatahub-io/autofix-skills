@@ -23,7 +23,7 @@ The `SessionStart` hook in `hooks/hooks.json` runs `tmp/dispatch-recovery.sh` af
 
 ## Architecture
 
-This plugin implements the **inner layer** of the autofix pipeline. The outer layer (ticket fetching, repo cloning, container launch, verdict reading, push, labeling) lives in `jira-autofix` and `ai-agentic-lib`.
+This plugin implements the **inner layer** of the autofix pipeline. The outer layer (ticket fetching, repo cloning, container launch, verdict reading, push, labeling) lives in `jira-autofix` and `agentic-ci`.
 
 **Orchestrator skills** (`autofix-resolve`, `autofix-cve-resolve`) are dispatchers — they call sub-agents via prompt files and delegate deterministic work to Python scripts. They never contain domain logic directly.
 
@@ -49,11 +49,11 @@ Skills in this plugin use the `autofix-` prefix (e.g., `autofix-resolve`) instea
 ## Extension Skills
 
 Team extensions are normal Claude skills in `ai-helpers` (not in this repo). Extensions:
-- Read context from `.autofix-context/` (ticket.json, config.json, verdict)
-- Write findings to `.autofix-context/extension-findings/<skill-name>.json`
+- Read context from `autofix-context/` (ticket.json, config.json, verdict)
+- Write findings to `autofix-context/extension-findings/<skill-name>.json`
 - Use the standard findings schema: `severity`, `description`, `file`, `line`
 
-The orchestrator discovers extensions via `.autofix-context/config.json` (written by the outer-layer runner) and calls them at fixed hook points (`post_implement`, `post_review`).
+The orchestrator discovers extensions via `autofix-context/config.json` (written by the outer-layer runner) and calls them at fixed hook points (`post_implement`, `post_review`).
 
 ## Local Development
 
