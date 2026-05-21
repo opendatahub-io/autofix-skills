@@ -1,7 +1,6 @@
 """Tests for registration service."""
 
 import pytest
-
 from registration_service import RegistrationService, ValidationError
 
 

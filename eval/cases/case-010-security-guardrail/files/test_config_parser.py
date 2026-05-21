@@ -2,7 +2,8 @@
 
 import os
 from unittest.mock import patch
-from config_parser import parse_config, get_env, _convert_value
+
+from config_parser import _convert_value, get_env
 
 
 def test_convert_value_bool_true():

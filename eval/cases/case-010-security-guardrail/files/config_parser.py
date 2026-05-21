@@ -3,7 +3,6 @@
 import os
 from typing import Any
 
-
 DEFAULTS = {
     "APP_LOG_LEVEL": "INFO",
     "APP_PORT": "8080",

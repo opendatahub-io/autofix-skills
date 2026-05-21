@@ -5,15 +5,14 @@ import re
 
 class ValidationError(Exception):
     """Raised when input validation fails."""
+
     pass
 
 
 class RegistrationService:
     """Handles user registration with validation."""
 
-    EMAIL_PATTERN = re.compile(
-        r"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
-    )
+    EMAIL_PATTERN = re.compile(r"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 
     def register_user(self, email: str, password: str) -> None:
         """Register a new user after validating inputs.

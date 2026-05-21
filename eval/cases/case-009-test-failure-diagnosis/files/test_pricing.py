@@ -1,6 +1,6 @@
 """Tests for pricing module."""
 
-from pricing import PricingItem, calculate_discount, bulk_discount_rate
+from pricing import PricingItem, bulk_discount_rate, calculate_discount
 
 
 def test_calculate_discount_no_cap():

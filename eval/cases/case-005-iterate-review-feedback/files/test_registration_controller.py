@@ -1,7 +1,6 @@
 """Tests for registration controller."""
 
 import pytest
-
 from registration_controller import RegistrationController, ValidationError
 
 
