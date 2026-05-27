@@ -49,7 +49,7 @@ Read `prompts/implement-agent.md` from this skill's directory and follow its ins
 
 ### Post-implement extensions
 
-If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_implement` in their `hooks`, call each one now with its configured `args`. For example: `/preflight --local --fix --skip-review coderabbit`. Skills listed as plain strings (no hooks field) run at all hook points with no args. Extensions read from `.autofix-context/` and write findings to `.autofix-context/extension-findings/<skill-name>.json`.
+If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_implement` in their `hooks`, invoke each one using the Skill tool (the `/` command) with its configured `args`. For example, invoke the skill: `/preflight --local --fix --skip-review coderabbit`. Do NOT search the filesystem for skills — they are Claude Code skills discovered from the workspace's `.claude/skills/` directory and invoked via the Skill tool. Skills listed as plain strings (no hooks field) run at all hook points with no args. Extensions read from `.autofix-context/` and write findings to `.autofix-context/extension-findings/<skill-name>.json`.
 
 ## Step 3: Call review agent
 
@@ -63,7 +63,7 @@ Read `prompts/review-agent.md` from this skill's directory and follow its instru
 
 ### Post-review extensions
 
-If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_review` in their `hooks`, call each one now with its configured `args`.
+If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_review` in their `hooks`, invoke each one using the Skill tool with its configured `args`.
 
 ### Merge findings
 
