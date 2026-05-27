@@ -30,7 +30,7 @@ Check the prompt for the mode:
 1. Read `.autofix-context/ticket.json` to understand the ticket
 2. Read the repo's `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` for project conventions
 3. (Iterate mode only) Read `.autofix-context/review-comments.json` and `.autofix-context/ci-failures.json`
-4. Check for `.autofix-context/config.json` — if present, read the `extra_skills` list for extension hook points
+4. Check for `.autofix-context/skill-hooks.json` — if present, read the structured extension config (each entry has `name`, `args`, and `hooks`). Falls back to `.autofix-context/config.json` `extra_skills` list (plain names, all hooks, no args).
 
 Store the ticket key in state:
 ```bash
@@ -49,7 +49,7 @@ Read `prompts/implement-agent.md` from this skill's directory and follow its ins
 
 ### Post-implement extensions
 
-If `.autofix-context/config.json` lists `extra_skills`, call each one now. Extensions read from `.autofix-context/` and write findings to `.autofix-context/extension-findings/<skill-name>.json`.
+If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_implement` in their `hooks`, call each one now with its configured `args`. For example: `/preflight --local --fix --skip-review coderabbit`. Skills listed as plain strings (no hooks field) run at all hook points with no args. Extensions read from `.autofix-context/` and write findings to `.autofix-context/extension-findings/<skill-name>.json`.
 
 ## Step 3: Call review agent
 
@@ -63,7 +63,7 @@ Read `prompts/review-agent.md` from this skill's directory and follow its instru
 
 ### Post-review extensions
 
-If `.autofix-context/config.json` lists `extra_skills`, call each one now.
+If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_review` in their `hooks`, call each one now with its configured `args`.
 
 ### Merge findings
 
