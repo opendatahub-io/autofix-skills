@@ -24,8 +24,13 @@ Usage (from orchestrator SKILL.md):
 from __future__ import annotations
 
 import json
+import logging
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 try:
     import yaml
@@ -48,7 +53,7 @@ except ImportError:
 
 # Valid state transitions
 TRANSITIONS = {
-    "parse": {"parsed": "scan", "ignore": "finalize"},
+    "parse": {"parsed": "scan", "ignore": "finalize", "embargoed": "finalize"},
     "scan": {"present": "route", "absent": "route", "scan_done": "finalize"},
     "route": {"fix": "fix", "vex": "vex", "skip": "scan"},
     "fix": {"fixed": "verify", "fix_failed": "scan"},
@@ -58,6 +63,32 @@ TRANSITIONS = {
     "pr": {"created": "scan", "pr_failed": "scan"},
     "finalize": {},
 }
+
+
+def check_cve_public(cve_id: str) -> bool:
+    """Check if a CVE exists in a public vulnerability database.
+
+    Returns True if the CVE is publicly known, False if not found (likely embargoed).
+    Returns True on network errors (fail-open to avoid blocking legitimate work).
+    """
+    url = f"https://api.osv.dev/v1/vulns/{cve_id}"
+    req = urllib.request.Request(url, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status == 200:
+                logger.info("CVE %s is publicly known (found in OSV database)", cve_id)
+                return True
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            logger.warning("CVE %s not found in public databases, likely embargoed", cve_id)
+            return False
+        logger.warning("Unexpected HTTP %d checking CVE %s, failing open", e.code, cve_id)
+        return True
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        logger.warning("Network error checking CVE %s (%s), failing open", cve_id, e)
+        return True
+
+    return True
 
 
 def init_state(state_file: Path, ticket_data: dict | None = None) -> dict:
@@ -274,13 +305,40 @@ def cmd_init(state_file: Path) -> int:
     return 0
 
 
+def cmd_check_cve(state_file: Path) -> int:
+    """Check if the CVE in state is publicly known."""
+    state = _load(state_file)
+    if not state:
+        print("ERROR: State file not found or empty", file=sys.stderr)
+        return 1
+
+    cve_id = state.get("cve_id", "")
+    if not cve_id:
+        print("ERROR: No cve_id found in state", file=sys.stderr)
+        return 1
+
+    if check_cve_public(cve_id):
+        print(f"CVE {cve_id} is publicly known")
+        return 0
+
+    print(
+        f"WARNING: CVE {cve_id} not found in public vulnerability databases. "
+        "This CVE may be embargoed. Refusing to proceed.",
+        file=sys.stderr,
+    )
+    return 1
+
+
 def main() -> int:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
     if len(sys.argv) < 3:
         print(
             "Usage:\n"
             "  cve_pipeline.py init <state-file>\n"
             "  cve_pipeline.py next <state-file>\n"
-            "  cve_pipeline.py transition <state-file> <event>",
+            "  cve_pipeline.py transition <state-file> <event>\n"
+            "  cve_pipeline.py check-cve <state-file>",
             file=sys.stderr,
         )
         return 1
@@ -297,6 +355,8 @@ def main() -> int:
             print("Usage: cve_pipeline.py transition <state-file> <event>", file=sys.stderr)
             return 1
         return cmd_transition(state_file, sys.argv[3])
+    elif command == "check-cve":
+        return cmd_check_cve(state_file)
     else:
         print(f"Unknown command: {command}", file=sys.stderr)
         return 1
