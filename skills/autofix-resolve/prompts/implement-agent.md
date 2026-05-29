@@ -70,7 +70,8 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
   "build_passed": true|false|null,
   "tests_passed": true|false|null,
   "upstream_consideration": "Notes on upstream fixes if applicable, or null",
-  "observations": ["Array of notable findings during implementation"]
+  "observations": ["Array of notable findings during implementation"],
+  "change_description": "Markdown description (committed) or null (all other verdicts)"
 }
 ```
 
@@ -84,6 +85,8 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 - `no_changes`: Catch-all for other no-code-change cases
 
 **Required fields:** `verdict` and `summary` are enforced by `verdict.py` (the validator rejects verdicts missing them). `reason` and `files_changed` are not enforced by the validator but are expected by the workflow -- the review skill uses `files_changed` to scope its diff checks, and `reason` is included in the Jira comment posted by the runner. Always include both.
+
+**`change_description`:** Required for `committed` verdicts; must be `null` for all other verdicts. When committing, write a markdown description summarizing all changes on the branch (not just the current iteration). This is used as the merge/pull request body and is refreshed on each run so the description stays current through review iterations. Follow the target repo's conventions for description length and format.
 
 Create the `autofix-output/` directory if it doesn't exist, then write the verdict file there.
 
