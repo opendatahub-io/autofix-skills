@@ -1,35 +1,29 @@
-# Container runtime (podman or docker)
-CONTAINER_RUNTIME ?= $(shell command -v podman 2>/dev/null || echo docker)
-
-# claudelint image
-CLAUDELINT_IMAGE = ghcr.io/stbenjam/claudelint:main
-
-# skilleval image
-SKILLEVAL_IMAGE ?= ghcr.io/opendatahub-io/ai-helpers-skilleval:latest
-
 .PHONY: help
 help: ## Show this help message
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: skilleval
-skilleval: ## Run skilleval linter on skills
-	@echo "Running skilleval on skills..."
-	@if [ -n "$${SKILLEVAL_BIN:-}" ]; then \
-		node "$${SKILLEVAL_BIN}" check skills/*/ --strict; \
+.PHONY: skillsaw
+skillsaw: ## Run skillsaw linter on skills and plugins
+	@echo "Running skillsaw..."
+	@if [ -n "$${SKILLSAW_BIN:-}" ]; then \
+		"$${SKILLSAW_BIN}"; \
 	else \
-		"$(CONTAINER_RUNTIME)" run --rm -v "$(PWD):/workspace:Z" "$(SKILLEVAL_IMAGE)" check skills/*/ --strict; \
+		uvx skillsaw; \
+	fi
+
+.PHONY: skillsaw-fix
+skillsaw-fix: ## Auto-fix fixable skillsaw issues
+	@echo "Fixing skillsaw issues..."
+	@if [ -n "$${SKILLSAW_BIN:-}" ]; then \
+		"$${SKILLSAW_BIN}" fix; \
+	else \
+		uvx skillsaw fix; \
 	fi
 
 .PHONY: lint
-lint: ## Run claudelint, skilleval, ruff, and shellcheck
-	@if [ "$$(uname -m)" = "x86_64" ]; then \
-		echo "Running claudelint with $(CONTAINER_RUNTIME)..."; \
-		$(CONTAINER_RUNTIME) run --rm -v $(PWD):/workspace:Z $(CLAUDELINT_IMAGE) -v --strict; \
-	else \
-		echo "Skipping claudelint on $$(uname -m) architecture (x86_64 required)"; \
-	fi
-	@$(MAKE) skilleval
+lint: ## Run skillsaw, ruff syntax checker and formatter, and shellcheck
+	@$(MAKE) skillsaw
 	@echo "Running ruff syntax checker on Python scripts..."
 	@if command -v ruff >/dev/null 2>&1; then \
 		ruff check .; \
