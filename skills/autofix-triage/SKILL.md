@@ -13,7 +13,7 @@ You are assessing a Jira bug ticket for AI autofix readiness. Your goal is to de
 
 ## Step 1: Parse the ticket content
 
-Read the ticket summary, description, and comments provided in the prompt. Extract:
+Read the ticket from `.autofix-context/ticket.json` (written by the pipeline orchestrator). Extract:
 
 - What the reporter claims is broken (the symptom)
 - Where they believe the bug is (component, feature area, file paths)
