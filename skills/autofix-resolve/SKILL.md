@@ -6,6 +6,8 @@ description: >-
   evaluates findings to decide iteration. Never writes code directly.
 allowed-tools: Read Write Bash Skill
 user-invocable: true
+metadata:
+  x-artifacts: "agent-output.txt autofix-output/ .autofix-context/ tmp/orchestrator-state.yaml tmp/dispatch-recovery.sh"
 ---
 
 # Skill: Resolve / Iterate Orchestrator

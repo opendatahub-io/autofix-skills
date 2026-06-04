@@ -5,6 +5,8 @@ description: >-
   Investigates the topic and writes structured findings to
   autofix-output/.autofix-verdict.json.
 allowed-tools: Read Write Glob Grep
+metadata:
+  x-artifacts: "agent-output.txt autofix-output/ .autofix-context/"
 ---
 
 # Research Spike Ticket
