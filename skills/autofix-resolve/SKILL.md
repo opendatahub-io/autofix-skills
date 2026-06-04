@@ -28,7 +28,7 @@ Check the prompt for the mode:
 ## Step 1: Read context
 
 1. Read `.autofix-context/ticket.json` to understand the ticket
-2. Read the repo's `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` for project conventions
+2. Read the repo's `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` for project conventions, and check for a PR template (`.github/pull_request_template.md`, or referenced in `CONTRIBUTING.md`)
 3. (Iterate mode only) Read `.autofix-context/review-comments.json` and `.autofix-context/ci-failures.json`
 4. Check for `.autofix-context/skill-hooks.json` — if present, read the structured extension config (each entry has `name`, `args`, and `hooks`). Falls back to `.autofix-context/config.json` `extra_skills` list (plain names, all hooks, no args).
 

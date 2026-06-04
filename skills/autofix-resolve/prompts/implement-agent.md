@@ -50,6 +50,7 @@ Before committing, run the repo's lint, build, and test commands:
 
 - Stage and commit with the repo's required format (check `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md`)
 - Fallback format if no repo conventions exist: `<TICKET-KEY>: <SUMMARY>`
+- Check for a PR template — look at `.github/pull_request_template.md` first, then check `CONTRIBUTING.md` or repo docs for guidance on PR format. If a template is found, use it to structure the commit message body — fill in sections, strip HTML comments, replace placeholder text. The commit body becomes the PR description.
 - Do not add trailers (Signed-off-by, Co-Authored-By, etc.) unless the repo's conventions explicitly require them
 
 ## Step 7: Write Verdict
