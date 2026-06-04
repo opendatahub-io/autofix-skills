@@ -33,6 +33,17 @@ This plugin implements the **inner layer** of the autofix pipeline. The outer la
 
 **Scripts** handle all deterministic operations: JSON merging, state persistence, CVE routing decisions. The LLM calls these via `python3 ${CLAUDE_SKILL_DIR}/../../scripts/<name>.py` and reads the output.
 
+## Artifact Declarations
+
+Every skill must declare the files and directories it creates via the `metadata.x-artifacts` field in its SKILL.md frontmatter. This lets downstream consumers (autofix, agentic-ci) build exclusion lists dynamically instead of maintaining hardcoded lists.
+
+```yaml
+metadata:
+  x-artifacts: "autofix-output/ .autofix-context/ tmp/state.yaml"
+```
+
+Paths are space-separated. Directories end with `/`. The `x-` prefix follows the convention for custom extension fields, keeping the format spec-compliant. When adding a new skill, always include artifact declarations for any files or directories the skill creates, reads as scaffold context, or that should be excluded from git commits.
+
 ## Naming Convention
 
 Skills in this plugin use the `autofix-` prefix (e.g., `autofix-resolve`) instead of the `jira-autofix-` prefix used by the original skills in `ai-helpers`. This avoids name collisions — both plugins can be active simultaneously on the container image.

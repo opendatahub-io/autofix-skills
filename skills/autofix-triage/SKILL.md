@@ -5,6 +5,8 @@ description: >-
   structured JSON verdict (ready/needs_info/not_fixable) based on a three-gate
   rubric. Designed for CI pipeline use with the autofix pipeline orchestrator.
 allowed-tools: Read Grep Glob Write
+metadata:
+  x-artifacts: "agent-output.txt .autofix-context/ .triage-context/ .triage-verdict.json"
 ---
 
 # Skill: Triage Bug Readiness
