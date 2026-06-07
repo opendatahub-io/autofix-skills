@@ -59,7 +59,7 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 
 ```json
 {
-  "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|research|no_changes",
+  "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|ci_blocked|research|no_changes",
   "reason": "Brief explanation of the verdict",
   "summary": "One-line summary of what was done",
   "files_changed": ["array", "of", "file", "paths"],
@@ -72,6 +72,7 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
   "tests_passed": true|false|null,
   "upstream_consideration": "Notes on upstream fixes if applicable, or null",
   "observations": ["Array of notable findings during implementation"],
+  "change_title": "Short PR/MR title (committed) or null (all other verdicts)",
   "change_description": "Markdown description (committed) or null (all other verdicts)"
 }
 ```
@@ -82,10 +83,13 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 - `not_a_bug`: Reported behavior is by design or an RFE
 - `insufficient_info`: Ticket lacks detail to attempt a fix
 - `blocked`: Cannot proceed (missing dependencies, infra requirements, etc.)
+- `ci_blocked`: CI/CD pipeline fails for reasons outside the agent's control (PR title validation, missing secrets, infrastructure issues). Use in iterate mode when the code fix is complete but CI cannot pass due to non-code factors.
 - `research`: Need more information before implementing
 - `no_changes`: Catch-all for other no-code-change cases
 
 **Required fields:** `verdict` and `summary` are enforced by `verdict.py` (the validator rejects verdicts missing them). `reason` and `files_changed` are not enforced by the validator but are expected by the workflow -- the review skill uses `files_changed` to scope its diff checks, and `reason` is included in the Jira comment posted by the runner. Always include both.
+
+**`change_title`:** Required for `committed` verdicts; must be `null` for all other verdicts. Write a short PR/MR title following the target repo's conventions. Check CI config, `.github/`, and `CONTRIBUTING.md` for title format requirements (e.g. conventional commits like `docs: ...`, `fix: ...`). The Jira ticket key is NOT automatically prepended; include it in the title only if the repo's conventions require it. This is used as the merge/pull request title and is refreshed on each iteration.
 
 **`change_description`:** Required for `committed` verdicts; must be `null` for all other verdicts. When committing, write a markdown description summarizing all changes on the branch (not just the current iteration). This is used as the merge/pull request body and is refreshed on each run so the description stays current through review iterations. Follow the target repo's conventions for description length and format.
 
