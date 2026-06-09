@@ -100,6 +100,7 @@ Create the `autofix-output/` directory if it doesn't exist, then write the verdi
 **Stay focused:**
 - Only change what the ticket asks for. Do not refactor unrelated code or improve files not related to the ticket.
 - Note pre-existing issues in observations rather than fixing them.
+- If CI fails for reasons unrelated to your change (flaky tests, bot policy checks, infrastructure timeouts, missing secrets, unrelated test suites), do not attempt to fix them. Use the `ci_blocked` verdict and describe what failed. Do not modify CI configs, PR templates, or test infrastructure to work around unrelated failures.
 
 **Test integrity:**
 - If an existing test fails after the code change, fix the code, not the test.
