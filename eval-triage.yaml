@@ -13,7 +13,7 @@ execution:
 runner:
   type: claude-code
   plugin_dirs:
-    - /home/stobin/git/autofix-skills
+    - .
   settings:
     hooks:
       SessionStart:
