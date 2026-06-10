@@ -51,7 +51,7 @@ dataset:
   workspace:
     files:
       - autofix-context
-      - AGENTS.md
+      - AGENTS.md.fixture
       - src
       - pom.xml
       - package.json

@@ -59,7 +59,7 @@ dataset:
   workspace:
     files:
       - autofix-context
-      - AGENTS.md
+      - AGENTS.md.fixture
       - CHANGELOG.md
       - src
 

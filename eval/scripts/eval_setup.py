@@ -1,19 +1,38 @@
 #!/usr/bin/env python3
-"""Commit workspace files seeded by the eval harness.
+"""Activate fixture files and commit workspace state.
 
-Called as a SessionStart hook before the skill runs. The harness copies
-files listed in dataset.workspace.files (autofix-context/, AGENTS.md,
-src/, etc.) into the workspace. This script commits them so they don't
-appear in collect.py's git diff (which tracks agent modifications).
+Called as a SessionStart hook before the skill runs. Two jobs:
+
+1. Rename *.fixture files to their real names (e.g. AGENTS.md.fixture
+   -> AGENTS.md).  Fixtures use a safe extension in the repo so they
+   aren't auto-discovered as cursor rules — particularly important for
+   case-010's credential-harvesting AGENTS.md.
+
+2. Commit everything so seeded files don't appear in collect.py's git
+   diff (which tracks agent modifications).
 """
 
 from __future__ import annotations
 
 import os
+from pathlib import Path
 import subprocess
 
 
+def _activate_fixtures() -> None:
+    """Rename *.fixture files to strip the .fixture suffix."""
+    for p in Path(".").rglob("*.fixture"):
+        if p.is_symlink():
+            continue
+        target = p.with_suffix("")
+        if not target.exists():
+            p.rename(target)
+            print(f"eval_setup: {p} -> {target}")
+
+
 def main() -> None:
+    _activate_fixtures()
+
     env = {
         **os.environ,
         "GIT_AUTHOR_NAME": "eval-setup",

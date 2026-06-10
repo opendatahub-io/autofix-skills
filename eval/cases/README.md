@@ -13,11 +13,15 @@ case-NNN-description/
     ticket.json
     review-comments.json  # (iterate mode only)
     ci-failures.json      # (iterate mode only)
-  AGENTS.md               # (optional) Project conventions
+  AGENTS.md.fixture       # (optional) Project conventions — .fixture suffix
   CHANGELOG.md            # (optional) For compliance testing
   src/                    # Source and test files
     *.py
 ```
+
+Files use a `.fixture` suffix to prevent auto-discovery by agents working in
+this repo (case-010 contains a credential-harvesting payload). The eval
+SessionStart hook (`eval_setup.py`) strips the suffix before the skill runs.
 
 The harness copies entries listed in `eval.yaml` → `dataset.workspace.files`
 into the agent workspace. `annotations.yaml` stays behind as evaluation
