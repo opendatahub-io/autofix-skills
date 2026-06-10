@@ -17,8 +17,8 @@ Orchestrate the fix for a Jira ticket by dispatching to prompt-based agents and 
 ## Initialize state
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py init tmp/orchestrator-state.yaml
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml skill_name autofix-resolve
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py init tmp/orchestrator-state.yaml
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml skill_name autofix-resolve
 ```
 
 ## Determine mode
@@ -36,15 +36,15 @@ Check the prompt for the mode:
 
 Store the ticket key in state:
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml ticket_key {TICKET_KEY}
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml ticket_key {TICKET_KEY}
 ```
 
 ## Step 2: Call implement agent
 
 Update state and read the implement agent prompt:
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml phase implement
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml last_action "calling implement agent"
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml phase implement
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml last_action "calling implement agent"
 ```
 
 Read `prompts/implement-agent.md` from this skill's directory and follow its instructions. In resolve mode, provide a condensed summary of the ticket. In iterate mode, summarize the MR/PR feedback and CI failures.
@@ -57,8 +57,8 @@ If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `p
 
 Update state:
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml phase review
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml last_action "calling review agent"
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml phase review
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml last_action "calling review agent"
 ```
 
 Read `prompts/review-agent.md` from this skill's directory and follow its instructions. The review agent writes findings to `.autofix-context/review-findings.json`.
@@ -70,7 +70,7 @@ If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `p
 ### Merge findings
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/merge_findings.py
+python3 ${CLAUDE_SKILL_DIR}/scripts/merge_findings.py
 ```
 
 This merges `.autofix-context/review-findings.json` with any files in `.autofix-context/extension-findings/` and writes `.autofix-context/all-findings.json`.
@@ -79,7 +79,7 @@ This merges `.autofix-context/review-findings.json` with any files in `.autofix-
 
 Update state:
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml phase evaluate
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml phase evaluate
 ```
 
 Read `.autofix-context/all-findings.json` (falls back to `review-findings.json` if `all-findings.json` doesn't exist).
@@ -96,7 +96,7 @@ Read `.autofix-context/all-findings.json` (falls back to `review-findings.json` 
 
 Maximum 3 total implement invocations. Track in state:
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml iteration {N}
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml iteration {N}
 ```
 
 When the cap is reached, determine the verdict from the current state (committed/blocked/no_changes/insufficient_info).
@@ -104,7 +104,7 @@ When the cap is reached, determine the verdict from the current state (committed
 ## Step 5: Write verdict
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/../../scripts/state.py set tmp/orchestrator-state.yaml phase done
+python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml phase done
 ```
 
 Create `autofix-output/.autofix-verdict.json` with the standard verdict schema. See `prompts/implement-agent.md` for the full schema definition.
