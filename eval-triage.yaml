@@ -38,17 +38,23 @@ mlflow:
 # Dataset — triage-specific test cases
 dataset:
   path: eval/cases-triage
-  input_files_dir: files
   schema: |
     Each case directory contains:
     - input.yaml: Minimal case metadata (ticket_key, mode).
-    - files/: All workspace files copied into the workspace root by the harness:
-      - autofix-context/ticket.json: Ticket data for the skill.
-      - AGENTS.md (optional): Project conventions for the skill to follow.
-      - .triage-context/ARCHITECTURE.md (optional): Architecture overview.
-      - Source and test files for the case.
+    - autofix-context/ticket.json: Ticket data for the skill.
+    - AGENTS.md (optional): Project conventions for the skill to follow.
+    - src/: Source and test files for the case.
+    - pom.xml (optional): Maven project file (Java cases).
+    - package.json (optional): Node project file (React/TS cases).
     - annotations.yaml: Expected verdict, gate assessments, and test metadata.
       Not copied to workspace (evaluation material only).
+  workspace:
+    files:
+      - autofix-context
+      - AGENTS.md
+      - src
+      - pom.xml
+      - package.json
 
 # Inputs — tool interception for headless execution
 inputs:

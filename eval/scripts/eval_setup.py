@@ -2,8 +2,8 @@
 """Commit workspace files seeded by the eval harness.
 
 Called as a SessionStart hook before the skill runs. The harness copies
-source files, autofix-context/, AGENTS.md, etc. from the case's files/
-directory into the workspace. This script commits them so they don't
+files listed in dataset.workspace.files (autofix-context/, AGENTS.md,
+src/, etc.) into the workspace. This script commits them so they don't
 appear in collect.py's git diff (which tracks agent modifications).
 """
 
