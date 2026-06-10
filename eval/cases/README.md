@@ -9,7 +9,7 @@ realistic Python code with intentional bugs or scenarios.
 case-NNN-description/
   input.yaml              # Case metadata (ticket_key, mode)
   annotations.yaml        # Expected outcomes (not copied to workspace)
-  autofix-context/        # Ticket data for the skill
+  .autofix-context/       # Ticket data for the skill
     ticket.json
     review-comments.json  # (iterate mode only)
     ci-failures.json      # (iterate mode only)

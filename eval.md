@@ -39,11 +39,11 @@ Each test case provides a self-contained `input.yaml` that embeds all case data.
 
 The setup script reads `input.yaml` and writes:
 
-- **`autofix-context/ticket.json`** (always): Created from the `ticket` field. Contains ticket details including `key`, `summary`, `description`, `labels`, `priority`.
+- **`.autofix-context/ticket.json`** (always): Created from the `ticket` field. Contains ticket details including `key`, `summary`, `description`, `labels`, `priority`.
 
-- **`autofix-context/review-comments.json`** (iterate mode): Created from the `review_comments` field. JSON array of MR/PR reviewer comments with `file`, `line`, `comment`.
+- **`.autofix-context/review-comments.json`** (iterate mode): Created from the `review_comments` field. JSON array of MR/PR reviewer comments with `file`, `line`, `comment`.
 
-- **`autofix-context/ci-failures.json`** (iterate mode): Created from the `ci_failures` field. JSON array of CI test failures with `test_name`, `error_message`, `log_excerpt`.
+- **`.autofix-context/ci-failures.json`** (iterate mode): Created from the `ci_failures` field. JSON array of CI test failures with `test_name`, `error_message`, `log_excerpt`.
 
 - **Source files** (from `files` list): Each entry has `path` and `content`. Includes Java source files, test files, `pom.xml`, etc.
 
@@ -81,7 +81,7 @@ The skill writes a single JSON file to `autofix-output/.autofix-verdict.json` wi
 
 ### Intermediate Files (not scored)
 
-The `autofix-context/` directory contains intermediate files used internally:
+The `.autofix-context/` directory contains intermediate files used internally:
 - `review-findings.json`: Array of findings from review agent
 - `all-findings.json`: Merged findings from review + extensions (created by merge_findings.py)
 - `extension-findings/<skill-name>.json`: Per-extension findings (if extensions are configured)
@@ -92,7 +92,7 @@ These are used for iteration decisions but are not the primary scoring artifacts
 
 1. **Initialize state** — Create `tmp/orchestrator-state.yaml` to persist progress across context compression. This state file tracks iteration count, current phase, and ticket key.
 
-2. **Determine mode** — Check for `review-comments.json` and `ci-failures.json` in `autofix-context/`:
+2. **Determine mode** — Check for `review-comments.json` and `ci-failures.json` in `.autofix-context/`:
    - If present: iterate mode (addressing review feedback)
    - If absent: resolve mode (fresh ticket fix)
 
@@ -114,9 +114,9 @@ These are used for iteration decisions but are not the primary scoring artifacts
 
 - **implement-agent** (prompts/implement-agent.md): Investigates codebase, writes code fix, adds tests, validates (lint/build/test), commits, and writes verdict. Produces code changes (committed to git) and `.autofix-verdict.json`.
 
-- **review-agent** (prompts/review-agent.md): Adversarially reviews code changes, runs mechanical checks (debug prints, TODOs, commented-out code), verifies validation was run, performs semantic review. Produces `autofix-context/review-findings.json`.
+- **review-agent** (prompts/review-agent.md): Adversarially reviews code changes, runs mechanical checks (debug prints, TODOs, commented-out code), verifies validation was run, performs semantic review. Produces `.autofix-context/review-findings.json`.
 
-- **extension-skills** (optional, from config.json): Team-specific checks that run after implement (post_implement hook) and after review (post_review hook). Produce `autofix-context/extension-findings/<skill-name>.json`.
+- **extension-skills** (optional, from config.json): Team-specific checks that run after implement (post_implement hook) and after review (post_review hook). Produce `.autofix-context/extension-findings/<skill-name>.json`.
 
 ## Quality Criteria
 

@@ -85,7 +85,7 @@ For each file in the diff:
 
 ## Step 4: Write findings
 
-Write your findings to `autofix-context/review-findings.json` as a JSON array:
+Write your findings to `.autofix-context/review-findings.json` as a JSON array:
 
 ```json
 [

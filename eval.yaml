@@ -48,9 +48,9 @@ dataset:
   schema: |
     Each case directory contains:
     - input.yaml: Minimal case metadata (ticket_key, mode).
-    - autofix-context/ticket.json: Ticket data for the skill.
-    - autofix-context/review-comments.json (iterate mode): Reviewer comments.
-    - autofix-context/ci-failures.json (iterate mode): CI failure details.
+    - .autofix-context/ticket.json: Ticket data for the skill.
+    - .autofix-context/review-comments.json (iterate mode): Reviewer comments.
+    - .autofix-context/ci-failures.json (iterate mode): CI failure details.
     - AGENTS.md (optional): Project conventions for the skill to follow.
     - CHANGELOG.md (optional): Changelog for AGENTS.md compliance testing.
     - src/: Source and test files for the case.
@@ -58,7 +58,7 @@ dataset:
       Not copied to workspace (evaluation material only).
   workspace:
     files:
-      - autofix-context
+      - .autofix-context
       - AGENTS.md.fixture
       - CHANGELOG.md
       - src
@@ -79,7 +79,7 @@ inputs:
         or Bash scripts calling the Jira API.
       prompt: |
         Block all Jira API calls. The skill should operate on the static
-        autofix-context/ticket.json file provided in the test case, not
+        .autofix-context/ticket.json file provided in the test case, not
         fetch live data from Jira.
 
     - match: |
@@ -111,7 +111,7 @@ outputs:
         "observations": ["Array of notable findings during implementation"]
       }
 
-  - path: autofix-context
+  - path: .autofix-context
     schema: |
       Intermediate files written during execution (not primary scoring artifacts):
       - review-findings.json: Array of findings from review agent. Each finding has:

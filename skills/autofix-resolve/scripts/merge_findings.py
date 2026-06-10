@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Merge core review findings with extension findings.
 
-Reads autofix-context/review-findings.json and any files in
-autofix-context/extension-findings/*.json, concatenates them,
+Reads .autofix-context/review-findings.json and any files in
+.autofix-context/extension-findings/*.json, concatenates them,
 tags each with a 'source' field, and writes the result to
-autofix-context/all-findings.json.
+.autofix-context/all-findings.json.
 
 If no extensions exist and no extension-findings/ directory is present,
 copies review-findings.json as-is.
@@ -21,7 +21,7 @@ def merge(work_dir: Path | None = None) -> int:
     if work_dir is None:
         work_dir = Path(".")
 
-    ctx_dir = work_dir / "autofix-context"
+    ctx_dir = work_dir / ".autofix-context"
     review_path = ctx_dir / "review-findings.json"
     ext_dir = ctx_dir / "extension-findings"
     output_path = ctx_dir / "all-findings.json"

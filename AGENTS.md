@@ -49,11 +49,11 @@ Skills in this plugin use the `autofix-` prefix (e.g., `autofix-resolve`) instea
 ## Extension Skills
 
 Team extensions are normal Claude skills in `ai-helpers` (not in this repo). Extensions:
-- Read context from `autofix-context/` (ticket.json, config.json, verdict)
-- Write findings to `autofix-context/extension-findings/<skill-name>.json`
+- Read context from `.autofix-context/` (ticket.json, config.json, verdict)
+- Write findings to `.autofix-context/extension-findings/<skill-name>.json`
 - Use the standard findings schema: `severity`, `description`, `file`, `line`
 
-The orchestrator discovers extensions via `autofix-context/config.json` (written by the outer-layer runner) and calls them at fixed hook points (`post_implement`, `post_review`).
+The orchestrator discovers extensions via `.autofix-context/config.json` (written by the outer-layer runner) and calls them at fixed hook points (`post_implement`, `post_review`).
 
 ## Local Development
 

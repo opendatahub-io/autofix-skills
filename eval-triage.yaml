@@ -41,7 +41,7 @@ dataset:
   schema: |
     Each case directory contains:
     - input.yaml: Minimal case metadata (ticket_key, mode).
-    - autofix-context/ticket.json: Ticket data for the skill.
+    - .autofix-context/ticket.json: Ticket data for the skill.
     - AGENTS.md (optional): Project conventions for the skill to follow.
     - src/: Source and test files for the case.
     - pom.xml (optional): Maven project file (Java cases).
@@ -50,7 +50,7 @@ dataset:
       Not copied to workspace (evaluation material only).
   workspace:
     files:
-      - autofix-context
+      - .autofix-context
       - AGENTS.md.fixture
       - src
       - pom.xml
@@ -70,7 +70,7 @@ inputs:
         or Bash scripts calling the Jira API.
       prompt: |
         Block all Jira API calls. The skill should operate on the static
-        autofix-context/ticket.json file provided in the test case, not
+        .autofix-context/ticket.json file provided in the test case, not
         fetch live data from Jira.
 
 # Outputs — .triage-verdict.json is at workspace root, captured via modified_files
