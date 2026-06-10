@@ -15,8 +15,8 @@ Called as a SessionStart hook before the skill runs. Two jobs:
 from __future__ import annotations
 
 import os
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 
 def _activate_fixtures() -> None:
