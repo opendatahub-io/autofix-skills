@@ -38,7 +38,7 @@ This is a **standalone skill** — it does not dispatch to sub-agents. It direct
 
 ## Inputs
 
-Each test case provides a self-contained `input.yaml` that embeds all case data. A `SessionStart` hook runs `eval/scripts/eval_setup.py` to materialize the workspace before the skill runs.
+Each test case provides a self-contained `input.yaml` that embeds all case data. A `SessionStart` hook (inline in `eval-triage.yaml`) activates `.fixture` files and commits the workspace before the skill runs.
 
 The setup script reads `input.yaml` and writes:
 

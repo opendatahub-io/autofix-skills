@@ -19,7 +19,7 @@ runner:
       SessionStart:
         - hooks:
             - type: command
-              command: 'bash -c ''python3 "$(realpath scripts/../eval/scripts/eval_setup.py)"'''
+              command: "python3 -c \"import os,subprocess,pathlib;[p.rename(p.with_suffix('')) for p in pathlib.Path('.').rglob('*.fixture') if not p.is_symlink() and not p.with_suffix('').exists()];subprocess.run(['git','add','-A'],check=True,capture_output=True);subprocess.run(['git','commit','-q','-m','case setup','--allow-empty'],check=True,capture_output=True,env={**os.environ,'GIT_AUTHOR_NAME':'eval-setup','GIT_AUTHOR_EMAIL':'eval@setup','GIT_COMMITTER_NAME':'eval-setup','GIT_COMMITTER_EMAIL':'eval@setup'})\""
 
 # Models — defaults for each role (CLI flags override)
 models:
