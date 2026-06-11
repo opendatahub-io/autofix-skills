@@ -67,7 +67,7 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 
 ```json
 {
-  "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|ci_blocked|research|no_changes",
+  "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|ci_blocked|no_changes",
   "reason": "Brief explanation of the verdict",
   "summary": "One-line summary of what was done",
   "files_changed": ["array", "of", "file", "paths"],
@@ -92,7 +92,6 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 - `insufficient_info`: Ticket lacks detail to attempt a fix
 - `blocked`: Cannot proceed (missing dependencies, infra requirements, etc.)
 - `ci_blocked`: CI/CD pipeline fails for reasons outside the agent's control (PR title validation, missing secrets, infrastructure issues). Use in iterate mode when the code fix is complete but CI cannot pass due to non-code factors.
-- `research`: Need more information before implementing
 - `no_changes`: Catch-all for other no-code-change cases
 
 **Required fields:** `verdict` and `summary` are enforced by `verdict.py` (the validator rejects verdicts missing them). `reason` and `files_changed` are not enforced by the validator but are expected by the workflow -- the review skill uses `files_changed` to scope its diff checks, and `reason` is included in the Jira comment posted by the runner. Always include both.
@@ -101,7 +100,16 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 
 **`change_description`:** Required for `committed` verdicts; must be `null` for all other verdicts. When committing, write a markdown description summarizing all changes on the branch (not just the current iteration). This is used as the merge/pull request body and is refreshed on each run so the description stays current through review iterations. Follow the target repo's conventions for description length and format.
 
-Create the `autofix-output/` directory if it doesn't exist, then write the verdict file there.
+Create the `autofix-output/` directory if it doesn't exist, write the verdict JSON to `autofix-output/.autofix-verdict.json`, then validate it against the schema:
+
+```bash
+uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
+  ${CLAUDE_SKILL_DIR}/../../schemas/autofix-verdict.json \
+  autofix-output/.autofix-verdict.json \
+  --input autofix-output/.autofix-verdict.json
+```
+
+If validation errors occur, fix the JSON and re-run. The script coerces common type mismatches (e.g. a string where an array is expected) automatically.
 
 ## Guardrails
 
