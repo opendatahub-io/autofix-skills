@@ -1,0 +1,15 @@
+expected_verdict: "committed"
+expected_files_changed_count: 1  # pricing.py only; tests already exist
+expected_validation:
+  lint_passed: null
+  build_passed: null
+  tests_passed: true
+notes: |
+  The bug is in calculate_discount(): when discount_pct exceeds max_discount_pct,
+  it averages the two rates instead of clamping to max_discount_pct. The test
+  test_calculate_discount_percentage is already failing. The skill should:
+  1. Run pytest and observe the existing test failure
+  2. Identify the root cause from the test output
+  3. Fix the capping logic (clamp, don't average)
+  4. Verify all tests pass after the fix
+  This tests the skill's ability to diagnose bugs from pre-existing test output.

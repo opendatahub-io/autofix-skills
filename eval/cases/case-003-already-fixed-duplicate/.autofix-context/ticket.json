@@ -1,0 +1,11 @@
+{
+  "key": "AUTOFIX-1003",
+  "summary": "register_user raises unhandled exception for invalid email",
+  "description": "**Symptom:**\n`register_user()` raises an unhandled exception when given an email\naddress with invalid format (e.g., 'notanemail').\n\n**Expected behavior:**\nShould raise `ValidationError` with message 'Invalid email format'.\n\n**Actual behavior:**\nRaises an unhandled `re.error` or lets invalid emails through.\n\n**Steps to reproduce:**\n```python\nfrom registration_service import RegistrationService\nsvc = RegistrationService()\nsvc.register_user(\"notanemail\", \"test123\")\n# Expected: ValidationError(\"Invalid email format\")\n```\n\n**Note:** This ticket was filed by QA team. There's a possibility this\nwas already addressed in the recent input validation refactor (PR #456,\nmerged last week).\n\n**Impact:** Poor user experience and potential data integrity issue.\n",
+  "labels": [
+    "bug",
+    "api",
+    "validation"
+  ],
+  "priority": "Major"
+}

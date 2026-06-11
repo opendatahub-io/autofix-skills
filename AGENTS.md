@@ -23,7 +23,7 @@ The `SessionStart` hook in `hooks/hooks.json` runs `tmp/dispatch-recovery.sh` af
 
 ## Architecture
 
-This plugin implements the **inner layer** of the autofix pipeline. The outer layer (ticket fetching, repo cloning, container launch, verdict reading, push, labeling) lives in `jira-autofix` and `ai-agentic-lib`.
+This plugin implements the **inner layer** of the autofix pipeline. The outer layer (ticket fetching, repo cloning, container launch, verdict reading, push, labeling) lives in `jira-autofix` and `agentic-ci`.
 
 **Orchestrator skills** (`autofix-resolve`, `autofix-cve-resolve`) are dispatchers — they call sub-agents via prompt files and delegate deterministic work to Python scripts. They never contain domain logic directly.
 

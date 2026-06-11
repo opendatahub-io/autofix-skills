@@ -48,10 +48,18 @@ Before committing, run the repo's lint, build, and test commands:
 
 ## Step 6: Commit
 
-- Stage and commit with the repo's required format (check `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md`)
-- Fallback format if no repo conventions exist: `<TICKET-KEY>: <SUMMARY>`
-- Check for a PR template — look at `.github/pull_request_template.md` first, then check `CONTRIBUTING.md` or repo docs for guidance on PR format. If a template is found, use it to structure the commit message body — fill in sections, strip HTML comments, replace placeholder text. The commit body becomes the PR description.
-- Do not add trailers (Signed-off-by, Co-Authored-By, etc.) unless the repo's conventions explicitly require them
+**Staging — explicit files only:**
+- Stage ONLY the files you created or modified: `git add <file1> <file2> ...`
+- NEVER use `git add -A`, `git add .`, or `git add --all` — these stage every file in the working tree and can include unintended files (secrets, credentials, build artifacts).
+- Run `git status` after staging to verify only your intended files are staged.
+
+**Commit message format:**
+1. Check the target repo's `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, and commit message hooks for commit format conventions.
+2. If the repo specifies a format (e.g. Conventional Commits), follow it and include the ticket key where the format allows (trailer, scope, or body).
+3. If no conventions exist, use the fallback format: `<TICKET-KEY>: <SUMMARY>`
+4. Check for a PR template — look at `.github/pull_request_template.md` first, then check `CONTRIBUTING.md` or repo docs for guidance on PR format. If a template is found, use it to structure the commit message body — fill in sections, strip HTML comments, replace placeholder text.
+5. Always ensure the ticket key appears somewhere in the commit message.
+6. Do not add trailers (Signed-off-by, Co-Authored-By, etc.) unless the repo's conventions explicitly require them.
 
 ## Step 7: Write Verdict
 

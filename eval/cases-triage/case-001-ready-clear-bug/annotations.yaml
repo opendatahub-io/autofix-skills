@@ -1,0 +1,16 @@
+expected_verdict: "ready"
+expected_confidence: "high"
+expected_gates:
+  gate1: pass
+  gate2: pass
+  gate3: pass
+notes: |
+  Clear-cut ready case. The ticket provides:
+  - Exact stack trace with file name and line number
+  - Specific reproduction steps
+  - Clear expected vs actual behavior
+  - Repo URL
+  The bug is a simple null check missing before String.isEmpty().
+  Code is locatable, fix direction is unambiguous, and the fix is
+  a straightforward single-repo code change.
+  Tests exist near the bug area but miss the null case.

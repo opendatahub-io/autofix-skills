@@ -1,0 +1,247 @@
+name: autofix-triage-eval
+description: Triage bug readiness assessment with three-gate rubric
+skill: autofix-triage
+
+# Execution — how the skill processes test cases
+execution:
+  mode: case
+  arguments: ""
+  timeout: 900
+  max_budget_usd: 3.0
+
+# Runner — agent harness + runner-specific knobs
+runner:
+  type: claude-code
+  plugin_dirs:
+    - .
+  settings:
+    hooks:
+      SessionStart:
+        - hooks:
+            - type: command
+              command: "python3 -c \"import os,subprocess,pathlib;[p.rename(p.with_suffix('')) for p in pathlib.Path('.').rglob('*.fixture') if not p.is_symlink() and not p.with_suffix('').exists()];subprocess.run(['git','add','-A'],check=True,capture_output=True);subprocess.run(['git','commit','-q','-m','case setup','--allow-empty'],check=True,capture_output=True,env={**os.environ,'GIT_AUTHOR_NAME':'eval-setup','GIT_AUTHOR_EMAIL':'eval@setup','GIT_COMMITTER_NAME':'eval-setup','GIT_COMMITTER_EMAIL':'eval@setup'})\""
+
+# Models — defaults for each role (CLI flags override)
+models:
+  skill: claude-opus-4-6
+  judge: claude-opus-4-6
+
+# Permissions for headless execution
+# autofix-triage only uses Read, Grep, Glob, Write — no Bash or Skill needed
+permissions:
+  allow: []
+
+# MLflow logging target
+mlflow:
+  experiment: autofix-triage-eval
+
+# Dataset — triage-specific test cases
+dataset:
+  path: eval/cases-triage
+  schema: |
+    Each case directory contains:
+    - input.yaml: Minimal case metadata (ticket_key, mode).
+    - .autofix-context/ticket.json: Ticket data for the skill.
+    - AGENTS.md (optional): Project conventions for the skill to follow.
+    - src/: Source and test files for the case.
+    - pom.xml (optional): Maven project file (Java cases).
+    - package.json (optional): Node project file (React/TS cases).
+    - annotations.yaml: Expected verdict, gate assessments, and test metadata.
+      Not copied to workspace (evaluation material only).
+  workspace:
+    files:
+      - .autofix-context
+      - AGENTS.md.fixture
+      - src
+      - pom.xml
+      - package.json
+
+# Inputs — tool interception for headless execution
+inputs:
+  tools:
+    - match: Questions asked to the user via AskUserQuestion
+      prompt: |
+        Answer based on the test case context in input.yaml and annotations.yaml.
+        For confirmation questions ("Should I proceed?"), answer "yes".
+        For choice questions, pick the first option.
+
+    - match: |
+        Any interaction with Jira — whether via MCP tools (mcp__atlassian__*)
+        or Bash scripts calling the Jira API.
+      prompt: |
+        Block all Jira API calls. The skill should operate on the static
+        .autofix-context/ticket.json file provided in the test case, not
+        fetch live data from Jira.
+
+# Outputs — .triage-verdict.json is at workspace root, captured via modified_files
+outputs: []
+
+# Traces — execution data to capture for judges
+traces:
+  stdout: true
+  stderr: true
+  events: true
+  metrics: true
+
+# Judges — evaluate triage quality
+judges:
+  - name: verdict_file_exists
+    description: Verify .triage-verdict.json exists and has required fields
+    check: |
+      import json
+      modified = outputs.get("modified_files", {})
+      content = modified.get(".triage-verdict.json")
+      if not content:
+          return False, ".triage-verdict.json not found in modified_files"
+      try:
+          verdict = json.loads(content)
+      except json.JSONDecodeError as e:
+          return False, f"Invalid JSON: {e}"
+      if not isinstance(verdict, dict):
+          return False, "Verdict is not a JSON object"
+      required = {"verdict", "confidence", "gate1", "gate2", "gate3", "reasoning"}
+      missing = required - set(verdict.keys())
+      if missing:
+          return False, f"Missing required fields: {missing}"
+      return True, "Verdict file valid with all required fields"
+
+  - name: verdict_value_valid
+    description: Verify verdict and confidence values are from the allowed set
+    check: |
+      import json
+      modified = outputs.get("modified_files", {})
+      content = modified.get(".triage-verdict.json")
+      if not content:
+          return False, "No verdict file"
+      verdict = json.loads(content)
+      v = verdict.get("verdict")
+      valid_verdicts = {"ready", "needs_info", "not_fixable"}
+      if v not in valid_verdicts:
+          return False, f"Invalid verdict '{v}', expected one of {valid_verdicts}"
+      c = verdict.get("confidence")
+      valid_confidence = {"high", "medium", "low"}
+      if c not in valid_confidence:
+          return False, f"Invalid confidence '{c}', expected one of {valid_confidence}"
+      return True, f"Verdict '{v}' with confidence '{c}' are valid"
+
+  - name: gate_consistency
+    description: Verify verdict follows the gate logic (Gate 1 fail -> needs_info; Gate 3 fail -> not_fixable; Gate 2 pass -> ready)
+    check: |
+      import json
+      modified = outputs.get("modified_files", {})
+      content = modified.get(".triage-verdict.json")
+      if not content:
+          return False, "No verdict file"
+      verdict = json.loads(content)
+      v = verdict.get("verdict")
+      g1 = verdict.get("gate1", {})
+      g2 = verdict.get("gate2", {})
+      g3 = verdict.get("gate3", {})
+
+      g1_pass = all(
+          g1.get(k, {}).get("pass", False)
+          for k in ("repo_url", "bug_description")
+          if k in g1
+      )
+      g2_pass = all(
+          g2.get(k, {}).get("pass", False)
+          for k in ("code_locatability", "fix_direction")
+          if k in g2
+      )
+      g3_pass = g3.get("pass", False)
+
+      if not g1_pass and v != "needs_info":
+          return False, f"Gate 1 failed but verdict is '{v}', expected 'needs_info'"
+      if g1_pass and not g3_pass and v != "not_fixable":
+          return False, f"Gate 3 failed but verdict is '{v}', expected 'not_fixable'"
+      if g1_pass and g3_pass and g2_pass and v != "ready":
+          return False, f"All gates passed but verdict is '{v}', expected 'ready'"
+      if g1_pass and g3_pass and not g2_pass and v != "needs_info":
+          return False, f"Gate 2 failed but verdict is '{v}', expected 'needs_info'"
+
+      return True, f"Verdict '{v}' is consistent with gate results"
+
+  - name: assessment_quality
+    description: Rate whether the gate assessments are thorough and evidence-based
+    prompt: |
+      Review the triage verdict and the agent's exploration of the codebase.
+
+      {{ outputs }}
+
+      {{ conversation }}
+
+      Evaluate:
+      1. Did the agent actually explore the codebase (read files, grep for patterns)?
+      2. Are the gate assessments specific and evidence-based (referencing actual files, functions, error messages)?
+      3. Did the agent check for test coverage, build infrastructure, and agent docs?
+      4. Is the reasoning clear and connected to the evidence found?
+      5. Are risk factors identified and meaningful?
+
+      Score:
+      1 - No evidence of code exploration, generic assessments
+      2 - Minimal exploration, vague assessments
+      3 - Some exploration, mostly specific assessments
+      4 - Thorough exploration, well-evidenced gate assessments
+      5 - Comprehensive exploration with specific file/function references, excellent reasoning
+
+  - name: feedback_quality
+    description: Rate whether message_to_opener is specific and actionable
+    prompt: |
+      Review the triage verdict's message_to_opener field.
+
+      {{ outputs }}
+
+      Evaluate based on the verdict type:
+      - For "needs_info": Does the message reference the specific failed gate? Does it
+        tell the opener exactly what information to provide? Is it structured with
+        "Needed" and "Helpful" sections?
+      - For "not_fixable": Does the message explain the specific Gate 3 category?
+        Does it suggest what kind of human intervention is needed?
+      - For "ready": Is message_to_opener empty or a brief confirmation?
+
+      Score:
+      1 - Generic or missing feedback
+      2 - Partially specific, missing key details
+      3 - Adequate specificity, reasonable structure
+      4 - Specific and actionable, well-structured
+      5 - Excellent: references exact gate failures, provides clear next steps
+
+  - name: confidence_calibration
+    description: Verify that verdict confidence aligns with annotation expectations
+    check: |
+      import json
+      modified = outputs.get("modified_files", {})
+      content = modified.get(".triage-verdict.json")
+      if not content:
+          return True, "No verdict file (skipped)"
+      verdict = json.loads(content)
+      expected_confidence = annotations.get("expected_confidence")
+      if not expected_confidence:
+          return True, "No expected confidence in annotations (skipped)"
+      actual = verdict.get("confidence")
+      if actual == expected_confidence:
+          return True, f"Confidence '{actual}' matches expected '{expected_confidence}'"
+      confidence_order = {"low": 0, "medium": 1, "high": 2}
+      a_rank = confidence_order.get(actual, -1)
+      e_rank = confidence_order.get(expected_confidence, -1)
+      if a_rank > e_rank:
+          return False, f"Confidence '{actual}' is higher than expected '{expected_confidence}' — agent is overconfident"
+      return False, f"Confidence '{actual}' does not match expected '{expected_confidence}'"
+
+  - name: cost_reasonable
+    description: Check that per-case cost stays under the budget threshold
+    check: |
+      cost = outputs.get("metrics", {}).get("cost_usd")
+      if cost is None:
+          return True, "No cost data available (skipped)"
+      threshold = 3.0
+      if cost > threshold:
+          return False, f"Cost ${cost:.2f} exceeds ${threshold:.2f} threshold"
+      return True, f"Cost ${cost:.2f} is within ${threshold:.2f} threshold"
+
+# Thresholds for regression detection
+thresholds:
+  assessment_quality:
+    min_mean: 3.5
+  feedback_quality:
+    min_mean: 3.0
