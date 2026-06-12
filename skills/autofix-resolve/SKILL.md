@@ -86,7 +86,7 @@ Read `.autofix-context/all-findings.json` (falls back to `review-findings.json` 
 
 **If no findings (empty array):** Proceed to Step 5.
 
-**If highest severity is `critical`:** Call implement agent again with the findings, then review again.
+**If highest severity is `critical` or `major`:** Call implement agent again with the findings, then review again.
 
 **If highest severity is `minor`:** Call implement agent again, then review.
 

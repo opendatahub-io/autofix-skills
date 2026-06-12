@@ -4,7 +4,7 @@ description: >-
   Use when assessing a Jira bug ticket for AI autofix readiness. Produces a
   structured JSON verdict (ready/needs_info/not_fixable) based on a three-gate
   rubric. Designed for CI pipeline use with the autofix pipeline orchestrator.
-allowed-tools: Read Grep Glob Write
+allowed-tools: Read Grep Glob Write Bash
 metadata:
   x-artifacts: "agent-output.txt .autofix-context/ .triage-context/ .triage-verdict.json"
 ---
@@ -68,6 +68,17 @@ See `references/rubric-and-schema.md` for the full gate rubric (pass/fail criter
 
 Write the verdict as JSON to `.triage-verdict.json` in the repository root. Use the Write tool to create this file. Do NOT just print it to stdout. See `references/rubric-and-schema.md` for the full JSON schema and field requirements.
 
+After writing the verdict file, validate it against the schema:
+
+```bash
+uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
+  ${CLAUDE_SKILL_DIR}/../../schemas/triage-verdict.json \
+  .triage-verdict.json \
+  --input .triage-verdict.json
+```
+
+If validation errors occur, fix the JSON and re-run.
+
 ## Step 6: Generate actionable feedback
 
 For `needs_info` verdicts, `message_to_opener` must reference the specific failed gate and tell the opener exactly what to provide. For `not_fixable`, explain the Gate 3 category and suggest human intervention. For `ready`, use an empty string. See `references/rubric-and-schema.md` for message templates.
@@ -83,3 +94,4 @@ For `needs_info` verdicts, `message_to_opener` must reference the specific faile
 - **Bias toward ready**: A wasted autofix cycle is cheaper than a missed fix. When on the fence, classify as `ready` with `"confidence": "low"` rather than `not_fixable`.
 - **Cross-repo is not systemic**: Fixes spanning multiple repos in the same GitHub/GitLab org are still `ready`, not `systemic_architectural`. Only use `not_fixable` when the dependency is genuinely outside the team's control.
 - **No repo clone is not a hard stop**: If no repo is present in the working directory, set `repo_readiness` fields to `false` with a note and proceed to Step 4 -- do not abort the entire assessment.
+- **Bash scoping**: Bash is available for `git log` inspection (Step 3) and verdict validation via `write_json.py` (Step 5). Do not use it for general-purpose investigation or running repo build/test commands.

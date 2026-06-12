@@ -107,17 +107,27 @@ Write your findings to `.autofix-context/review-findings.json` as a JSON array:
 Write an empty array `[]` if no issues are found.
 
 Each finding must include:
-- `severity`: one of `critical`, `minor`, or `nitpick`
+- `severity`: one of `critical`, `major`, `minor`, or `nitpick`
 - `description`: what the issue is
 - `file`: which file (when applicable, empty string if general)
 - `line`: line number (when applicable, 0 if general)
 
 **Severity definitions:**
 - `critical`: wrong logic, security issue, missing requirement, broken tests, test manipulation, no evidence of validation
+- `major`: significant correctness concern, data integrity risk, missing edge case handling, incomplete implementation of a requirement
 - `minor`: style, naming, small cleanup, missing error message improvement
 - `nitpick`: informational, subjective preference, alternative approach suggestion
 
 Be honest. If the fix looks good, write an empty array. Do not invent problems.
+
+After writing the findings file, validate it against the schema:
+
+```bash
+uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
+  ${CLAUDE_SKILL_DIR}/../../schemas/review-findings.json \
+  .autofix-context/review-findings.json \
+  --input .autofix-context/review-findings.json
+```
 
 ## Gotchas
 

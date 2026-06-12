@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Triage Verdict",
+  "description": "Readiness verdict from autofix-triage skill.",
+  "type": "object",
+  "required": [
+    "verdict",
+    "confidence"
+  ],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "needs_info",
+        "not_fixable"
+      ]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "gate1": {
+      "type": "object",
+      "properties": {
+        "repo_url": {
+          "type": "object",
+          "properties": {
+            "pass": {
+              "type": "boolean"
+            },
+            "value": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "bug_description": {
+          "type": "object",
+          "properties": {
+            "pass": {
+              "type": "boolean"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "gate2": {
+      "type": "object",
+      "properties": {
+        "code_locatability": {
+          "type": "object",
+          "properties": {
+            "pass": {
+              "type": "boolean"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "fix_direction": {
+          "type": "object",
+          "properties": {
+            "pass": {
+              "type": "boolean"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "gate3": {
+      "type": "object",
+      "properties": {
+        "pass": {
+          "type": "boolean"
+        },
+        "not_fixable_reason": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "requires_design_decisions",
+                "requires_infrastructure",
+                "systemic_architectural",
+                "needs_runtime_investigation",
+                "performance",
+                "non_code_fix"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note": {
+          "type": "string"
+        },
+        "cross_repo": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "repo_readiness": {
+      "type": "object",
+      "properties": {
+        "has_agent_docs": {
+          "type": "boolean"
+        },
+        "has_build_targets": {
+          "type": "boolean"
+        },
+        "has_lint_config": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "risk_factors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "message_to_opener": {
+      "type": "string"
+    },
+    "reasoning": {
+      "type": "string"
+    }
+  }
+}

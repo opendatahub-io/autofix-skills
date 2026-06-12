@@ -8,11 +8,14 @@ Claude Code plugin providing orchestrator skills, prompt files, and state manage
 .claude-plugin/plugin.json   Marketplace packaging metadata
 skills/                      Skill directories (each contains SKILL.md + prompts/ + scripts/)
   autofix-resolve/           Orchestrator: implement → review → evaluate loop
-    scripts/                 state.py, merge_findings.py
+    scripts/                 state.py, merge_findings.py, write_json.py
   autofix-cve-resolve/       CVE orchestrator: state-machine dispatcher
-    scripts/                 state.py, cve_pipeline.py, scan.sh, verify.sh, check-existing-prs.sh
+    scripts/                 state.py, cve_pipeline.py, scan.sh, verify.sh, check-existing-prs.sh, write_json.py
   autofix-triage/            Standalone bug readiness assessment
+    scripts/                 write_json.py
   autofix-research/          Standalone spike/research investigation
+    scripts/                 write_json.py
+schemas/                     JSON Schema definitions for structured output files
 hooks/                       Claude Code event hooks
   hooks.json                 SessionStart hook for context-compression recovery
 ```
@@ -29,7 +32,9 @@ This plugin implements the **inner layer** of the autofix pipeline. The outer la
 
 **Prompt files** (`prompts/*.md`) are self-contained agent personas. Each defines a complete set of instructions for one task (implement a fix, review changes, scan for CVEs, etc.).
 
-**Scripts** handle all deterministic operations: JSON merging, state persistence, CVE routing decisions. Each skill ships its own scripts under `scripts/` within the skill directory, following the Agent Skills standard. The LLM calls these via `python3 ${CLAUDE_SKILL_DIR}/scripts/<name>.py`. `state.py` is duplicated in both `autofix-resolve/scripts/` and `autofix-cve-resolve/scripts/` because each skill must be self-contained for plugin packaging. Changes to `state.py` must be applied to both copies.
+**Scripts** handle all deterministic operations: JSON merging, state persistence, CVE routing decisions, and schema validation. Each skill ships its own scripts under `scripts/` within the skill directory, following the Agent Skills standard. The LLM calls these via `python3 ${CLAUDE_SKILL_DIR}/scripts/<name>.py`. PEP 723 inline-dependency scripts (e.g., `write_json.py`) are called via `uv run --script ${CLAUDE_SKILL_DIR}/scripts/<name>.py`. `state.py` is duplicated in both `autofix-resolve/scripts/` and `autofix-cve-resolve/scripts/` because each skill must be self-contained for plugin packaging. Changes to `state.py` must be applied to both copies.
+
+**Schemas** (`schemas/*.json`) are JSON Schema definitions for all structured output files. The `write_json.py` script validates output against these schemas and coerces common LLM type mismatches (e.g. string where array expected, string where boolean expected) before writing.
 
 ## Artifact Declarations
 
