@@ -72,7 +72,7 @@ After writing the verdict file, validate it against the schema:
 
 ```bash
 uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
-  ${CLAUDE_SKILL_DIR}/../../schemas/triage-verdict.json \
+  ${CLAUDE_SKILL_DIR}/schemas/triage-verdict.json \
   .triage-verdict.json \
   --input .triage-verdict.json
 ```

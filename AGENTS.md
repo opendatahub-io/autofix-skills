@@ -13,7 +13,6 @@ skills/                      Skill directories (each contains SKILL.md + prompts
     scripts/                 state.py, cve_pipeline.py, scan.sh, verify.sh, check-existing-prs.sh, write_json.py
   autofix-triage/            Standalone bug readiness assessment
     scripts/                 write_json.py
-schemas/                     JSON Schema definitions for structured output files
 hooks/                       Claude Code event hooks
   hooks.json                 SessionStart hook for context-compression recovery
 ```
@@ -32,7 +31,7 @@ This plugin implements the **inner layer** of the autofix pipeline. The outer la
 
 **Scripts** handle all deterministic operations: JSON merging, state persistence, CVE routing decisions, and schema validation. Each skill ships its own scripts under `scripts/` within the skill directory, following the Agent Skills standard. The LLM calls these via `python3 ${CLAUDE_SKILL_DIR}/scripts/<name>.py`. PEP 723 inline-dependency scripts (e.g., `write_json.py`) are called via `uv run --script ${CLAUDE_SKILL_DIR}/scripts/<name>.py`. `state.py` is duplicated in both `autofix-resolve/scripts/` and `autofix-cve-resolve/scripts/` because each skill must be self-contained for plugin packaging. Changes to `state.py` must be applied to both copies.
 
-**Schemas** (`schemas/*.json`) are JSON Schema definitions for all structured output files. The `write_json.py` script validates output against these schemas and coerces common LLM type mismatches (e.g. string where array expected, string where boolean expected) before writing.
+**Schemas** (`schemas/*.json` within each skill directory) are JSON Schema definitions for structured output files. Each skill ships its own schemas alongside its scripts and prompts, following the self-contained packaging model. The `write_json.py` script validates output against these schemas and coerces common LLM type mismatches (e.g. string where array expected, string where boolean expected) before writing.
 
 ## Artifact Declarations
 

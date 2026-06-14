@@ -124,7 +124,7 @@ After writing the findings file, validate it against the schema:
 
 ```bash
 uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
-  ${CLAUDE_SKILL_DIR}/../../schemas/review-findings.json \
+  ${CLAUDE_SKILL_DIR}/schemas/review-findings.json \
   .autofix-context/review-findings.json \
   --input .autofix-context/review-findings.json
 ```
