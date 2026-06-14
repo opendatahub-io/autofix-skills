@@ -13,8 +13,6 @@ skills/                      Skill directories (each contains SKILL.md + prompts
     scripts/                 state.py, cve_pipeline.py, scan.sh, verify.sh, check-existing-prs.sh, write_json.py
   autofix-triage/            Standalone bug readiness assessment
     scripts/                 write_json.py
-  autofix-research/          Standalone spike/research investigation
-    scripts/                 write_json.py
 schemas/                     JSON Schema definitions for structured output files
 hooks/                       Claude Code event hooks
   hooks.json                 SessionStart hook for context-compression recovery

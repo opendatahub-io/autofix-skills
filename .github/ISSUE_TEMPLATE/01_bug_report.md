@@ -11,7 +11,7 @@ assignees: ''
 ### Affected Component
 <!-- Check all that apply -->
 - [ ] Orchestrator skill (autofix-resolve, autofix-cve-resolve)
-- [ ] Triage/research skill
+- [ ] Triage skill
 - [ ] Python script (state.py, merge_findings.py, cve_pipeline.py)
 - [ ] Hooks (hooks.json)
 - [ ] Plugin metadata (plugin.json)

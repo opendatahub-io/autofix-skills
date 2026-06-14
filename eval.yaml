@@ -96,7 +96,7 @@ outputs:
 
       Schema:
       {
-        "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|research|no_changes",
+        "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|no_changes",
         "reason": "Brief explanation of the verdict",
         "summary": "One-line summary of what was done",
         "files_changed": ["array", "of", "file", "paths"],
@@ -144,7 +144,7 @@ judges:
               return False, "Verdict is not a JSON object"
           if "verdict" not in verdict or "summary" not in verdict:
               return False, "Verdict missing required fields (verdict, summary)"
-          valid_verdicts = {"committed", "already_fixed", "not_a_bug", "insufficient_info", "blocked", "research", "no_changes"}
+          valid_verdicts = {"committed", "already_fixed", "not_a_bug", "insufficient_info", "blocked", "no_changes"}
           if verdict["verdict"] not in valid_verdicts:
               return False, f"Invalid verdict value: {verdict['verdict']}"
           return True, "Verdict file valid"
@@ -164,7 +164,7 @@ judges:
 
       if v == "committed" and not files:
           return False, "Verdict 'committed' but files_changed is empty"
-      if v in ["already_fixed", "not_a_bug", "insufficient_info", "blocked", "research", "no_changes"] and files:
+      if v in ["already_fixed", "not_a_bug", "insufficient_info", "blocked", "no_changes"] and files:
           return False, f"Verdict '{v}' but files_changed is non-empty"
 
       if files:

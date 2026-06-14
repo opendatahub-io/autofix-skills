@@ -13,7 +13,6 @@ This plugin is the **inner layer** of the autofix pipeline, the skills that run 
 | `autofix-resolve` | Orchestrates end-to-end bug fixing: implement, review, evaluate loop (max 3 iterations) |
 | `autofix-cve-resolve` | CVE remediation across multiple repos with state-machine dispatch |
 | `autofix-triage` | Assesses bug tickets for AI autofix readiness (ready/needs_info/not_fixable) |
-| `autofix-research` | Investigates spike tickets with no associated repository |
 
 ### Scripts
 
