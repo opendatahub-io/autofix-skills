@@ -49,6 +49,37 @@ make lint
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development workflow.
 
+## Evaluation
+
+The `eval/` directory contains test cases for evaluating skill quality using the [agent-eval-harness](https://github.com/opendatahub-io/agent-eval-harness). Two eval configs are provided:
+
+| Config | Skill | Cases |
+|--------|-------|-------|
+| `eval.yaml` | `autofix-resolve` | `eval/cases/` (10 cases: bug fixes, iteration, triage decisions, security guardrails) |
+| `eval-triage.yaml` | `autofix-triage` | `eval/cases-triage/` (4 cases: ready, needs_info, not_fixable, borderline) |
+
+### Running evals
+
+```bash
+# Install the eval harness
+pip install -e ../agent-eval-harness
+
+# Run the autofix-resolve eval suite
+/eval-run --config eval.yaml --model opus
+
+# Run the triage eval suite
+/eval-run --config eval-triage.yaml --model opus
+
+# Run a single case
+/eval-run --config eval.yaml --model opus --cases case-006-agents-md-compliance
+```
+
+Results are written to `eval/runs/<run-id>/` with per-case verdicts, modified files, events, and an HTML report. See [eval.md](eval.md) and [eval-triage.md](eval-triage.md) for detailed analysis docs.
+
+### Test case structure
+
+Each case directory contains an `input.yaml`, `.autofix-context/` with ticket data, optional source files in `src/`, and `annotations.yaml` with expected outcomes. `AGENTS.md` files are stored with a `.fixture` suffix to prevent agents working in this repo from auto-discovering test payloads (case-010 contains a credential-harvesting guardrail test). The eval `SessionStart` hook activates fixtures before each case runs.
+
 ## Architecture
 
 See [AGENTS.md](AGENTS.md) for architecture details and conventions.
