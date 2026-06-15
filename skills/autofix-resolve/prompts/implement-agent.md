@@ -104,7 +104,7 @@ Create the `autofix-output/` directory if it doesn't exist, write the verdict JS
 
 ```bash
 uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
-  ${CLAUDE_SKILL_DIR}/../../schemas/autofix-verdict.json \
+  ${CLAUDE_SKILL_DIR}/schemas/autofix-verdict.json \
   autofix-output/.autofix-verdict.json \
   --input autofix-output/.autofix-verdict.json
 ```
