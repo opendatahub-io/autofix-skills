@@ -72,3 +72,16 @@ To test skills locally, point `SkillConfig.skill_ref` to your branch or mount th
 ## Versioning
 
 Use git tags (`v0.1.0`, `v0.2.0`, etc.) for releases. The outer-layer runner pins a release via `SkillConfig.skill_ref`. The `main` branch is the development head.
+
+## Debugging
+
+Use the `/debug-autofix-skills` skill when investigating agent-side failures. It provides a symptom catalog and structured RCA template.
+
+When fixing a bug or adding a feature that changes failure modes, update `.claude/skills/debug-autofix-skills/references/symptoms.md` with the new pattern so future investigations have it in context.
+
+When investigating this repo specifically, focus on:
+
+- **Wrong fix or bad verdict**: Read the relevant skill's `SKILL.md` for the prompt and expected verdict schema. Check `scripts/state.py` for orchestration state (was the correct phase dispatched?). Check `scripts/merge_findings.py` for review finding aggregation. Verify the verdict JSON matches the schema in `schemas/`.
+- **Review loop not converging**: Check the implement/review/evaluate cycle in the orchestrator skill. Check if `state.py` is advancing phases or stuck. Check prompt files in `prompts/` for ambiguous instructions.
+- **Context missing**: The outer layer (autofix repo) writes context files to `.autofix-context/` before the agent runs. If the agent lacks info, the issue is likely in the outer layer's `context_writer`, not here. Check `.autofix-context/ticket.json` and `.autofix-context/config.json`.
+- **Extension skill failures**: Check `.autofix-context/config.json` for the extension list. Check `.autofix-context/extension-findings/` for output. Extensions are called at `post_implement` and `post_review` hook points.

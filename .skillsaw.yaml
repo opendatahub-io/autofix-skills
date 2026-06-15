@@ -1,6 +1,9 @@
 # skillsaw configuration
 # https://github.com/stbenjam/skillsaw
 
+exclude:
+  - ".claude/**"
+
 rules:
   command-sections:
     enabled: true
@@ -27,5 +30,15 @@ rules:
   content-critical-position:
     enabled: true
     severity: info
+
+  plugin-naming:
+    exclude:
+      - ".claude"
+  plugin-json-required:
+    exclude:
+      - ".claude"
+  plugin-readme:
+    exclude:
+      - ".claude"
 
 strict: true
