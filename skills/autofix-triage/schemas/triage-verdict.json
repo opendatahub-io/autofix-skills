@@ -5,7 +5,8 @@
   "type": "object",
   "required": [
     "verdict",
-    "confidence"
+    "confidence",
+    "security_sensitive"
   ],
   "properties": {
     "verdict": {
@@ -157,6 +158,10 @@
     },
     "reasoning": {
       "type": "string"
+    },
+    "security_sensitive": {
+      "type": "boolean",
+      "description": "True if the ticket describes a potential security vulnerability (auth bypass, injection, privilege escalation, data exposure, cryptographic weakness, etc.) that was not already caught by JQL-level embargo filters."
     }
   }
 }
