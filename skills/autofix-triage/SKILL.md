@@ -48,7 +48,27 @@ When a target repo is available, context files are a map, not the territory. Use
 - **Check build/lint/test infrastructure** -- Read the first ~60 lines of `Makefile` (or equivalent) to see available targets. If there is no way to validate a fix (no linter, no tests, no build target), the autofix agent may produce untestable patches. Note this as a risk factor but do NOT fail the ticket on this alone.
 - **Check cross-component impact** -- Does the bug area touch shared code (e.g., `pkg/`, `lib/`, `utils/`) used by multiple consumers? If so, the fix has wider blast radius.
 
-## Step 4: Assess readiness using the rubric
+## Step 4: Evaluate security sensitivity
+
+Determine whether the ticket describes a potential security vulnerability. This catches security-sensitive bugs that were filed as regular Bug tickets without any of the JQL-level embargo markers (Vulnerability type, "EMBARGOED" in title, CVE pattern, Embargoed security level).
+
+Flag `security_sensitive: true` if the bug description involves any of:
+
+- Authentication or authorization bypass
+- Privilege escalation
+- Injection vulnerabilities (SQL, command, code, LDAP, XSS, etc.)
+- Data exposure or information leakage
+- Cryptographic weaknesses or credential handling flaws
+- Path traversal or file access control issues
+- Denial of service via resource exhaustion
+- Security header or CORS misconfigurations
+- Supply chain concerns (dependency tampering, malicious payloads)
+
+Set `security_sensitive: false` for bugs that are purely functional, cosmetic, or performance-related with no security implications.
+
+When `security_sensitive` is true, the orchestrator will require human approval before autofix proceeds, regardless of the readiness verdict.
+
+## Step 5: Assess readiness using the rubric
 
 The core question: "If the autofix agent were handed this ticket right now, would it produce a correct fix, or would it waste a cycle guessing wrong?"
 
@@ -64,7 +84,7 @@ See `references/rubric-and-schema.md` for the full gate rubric (pass/fail criter
 
 **Verdict logic:** Gate 1 fail -> `needs_info`; Gate 3 fail -> `not_fixable`; Gate 2 pass -> `ready`; else -> `needs_info`. Prefer `ready` with `"confidence": "low"` over `not_fixable` when uncertain.
 
-## Step 5: Write structured verdict to file
+## Step 6: Write structured verdict to file
 
 Write the verdict as JSON to `.triage-verdict.json` in the repository root. Use the Write tool to create this file. Do NOT just print it to stdout. See `references/rubric-and-schema.md` for the full JSON schema and field requirements.
 
@@ -79,7 +99,7 @@ uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
 
 If validation errors occur, fix the JSON and re-run.
 
-## Step 6: Generate actionable feedback
+## Step 7: Generate actionable feedback
 
 For `needs_info` verdicts, `message_to_opener` must reference the specific failed gate and tell the opener exactly what to provide. For `not_fixable`, explain the Gate 3 category and suggest human intervention. For `ready`, use an empty string. See `references/rubric-and-schema.md` for message templates.
 
