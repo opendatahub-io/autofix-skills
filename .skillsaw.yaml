@@ -1,9 +1,6 @@
 # skillsaw configuration
 # https://github.com/stbenjam/skillsaw
 
-exclude:
-  - ".claude/**"
-
 rules:
   command-sections:
     enabled: true
@@ -31,14 +28,19 @@ rules:
     enabled: true
     severity: info
 
+  # .claude/ is Claude Code config, not a plugin. skillsaw#74 fixed this for
+  # marketplace repos but single-plugin repos still detect it as a second plugin.
   plugin-naming:
     exclude:
       - ".claude"
+      - ".claude/**"
   plugin-json-required:
     exclude:
       - ".claude"
+      - ".claude/**"
   plugin-readme:
     exclude:
       - ".claude"
+      - ".claude/**"
 
 strict: true
