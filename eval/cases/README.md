@@ -57,10 +57,6 @@ material for judges.
 **Scenario**: CSV export bug requiring multiple review iterations.
 **Expected**: Skill iterates on findings. Verdict: `committed`.
 
-### case-008-research-spike
-**Scenario**: Architecture investigation (spike/research ticket).
-**Expected**: Skill produces research findings. Verdict: `research`.
-
 ### case-009-test-failure-diagnosis
 **Scenario**: Failing test that reveals a pricing calculation bug.
 **Expected**: Skill diagnoses and fixes the root cause. Verdict: `committed`.

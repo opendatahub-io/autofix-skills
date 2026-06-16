@@ -63,7 +63,7 @@ The skill writes a single JSON file to `autofix-output/.autofix-verdict.json` wi
 
 ```json
 {
-  "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|research|no_changes",
+  "verdict": "committed|already_fixed|not_a_bug|insufficient_info|blocked|no_changes",
   "reason": "Brief explanation of the verdict",
   "summary": "One-line summary of what was done",
   "files_changed": ["array", "of", "file", "paths"],
@@ -123,7 +123,7 @@ These are used for iteration decisions but are not the primary scoring artifacts
 ### Deterministic Checks
 
 - Verdict file exists at `autofix-output/.autofix-verdict.json`
-- Verdict.verdict field is one of the canonical values (committed, already_fixed, not_a_bug, insufficient_info, blocked, research, no_changes)
+- Verdict.verdict field is one of the canonical values (committed, already_fixed, not_a_bug, insufficient_info, blocked, no_changes)
 - `files_changed` array matches actual git-committed files
 - If `files_changed` is non-empty: `lint_passed`, `build_passed`, `tests_passed` have boolean or null values
 - If iteration >= 3: verdict does not attempt further implementation (must be deterministic fallback verdict)
