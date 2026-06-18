@@ -10,6 +10,8 @@ Read the ticket context from `.autofix-context/ticket.json`. Extract:
 - Where the bug is (component, file paths, error messages)
 - Expected vs. actual behavior
 
+If `.autofix-context/meta/` exists, read its markdown files for architecture documentation and coding conventions that apply to this repo.
+
 Then investigate the codebase to locate the code area referenced by the bug and understand the context around it.
 
 ## Step 2: Evaluate fix strategy

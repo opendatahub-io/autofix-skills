@@ -28,9 +28,10 @@ Read the ticket from `.autofix-context/ticket.json` (written by the pipeline orc
 
 Read the following files in order of priority. Stop reading deeper once you have a solid mental map of the repo structure:
 
-1. `.triage-context/ARCHITECTURE.md` (if present) -- Pre-generated architecture overview. Focus on the component map, CRD list, and directory structure. Use this to plan where to look in the code.
-2. `AGENTS.md` and/or `CLAUDE.md` (if present in repo root) -- The repo's own agent guidance, conventions, and critical rules. These are authoritative and take precedence over the architecture doc.
-3. `README.md` -- Fallback orientation if neither of the above exists.
+1. `.triage-context/meta/` (if present) -- Team-provided architecture documentation from a meta repo. Read all markdown files in this directory. Focus on component maps, CRD lists, directory structure, and coding conventions. Use this to plan where to look in the code.
+2. `.triage-context/ARCHITECTURE.md` (if present, and no meta/ directory) -- Legacy pre-generated architecture overview. Same purpose as meta/ above.
+3. `AGENTS.md` and/or `CLAUDE.md` (if present in repo root) -- The repo's own agent guidance, conventions, and critical rules. These are authoritative and take precedence over the architecture docs.
+4. `README.md` -- Fallback orientation if none of the above exists.
 
 If none of these files exist, explore the repository from scratch: check `go.mod` or `package.json` for the language/framework, list top-level directories, and read any contributing guides.
 
