@@ -54,23 +54,19 @@ if [[ ${#FILES[@]} -gt 0 ]]; then
 fi
 ```
 
-The `FILES` array is built from the verdict's `files_changed` (one entry per line to handle paths with spaces). If the verdict is unreadable, the fallback uses `git diff --name-only HEAD~1`. If `files_changed` is an intentional empty array (no-code-change verdict), no fallback is triggered and mechanical checks are correctly skipped.
-
-The awk tracks streaks of added comment lines and resets the counter when a non-comment added line appears. Exits 0 if any streak reaches 3+. If it exits 0, flag a finding for large commented-out code blocks.
-
-These pipelines return non-zero when no matches are found -- that is expected, not an error. Record any matches as findings.
+Non-zero exits from the grep pipelines mean no matches (expected, not errors). The awk pipeline exits 0 if it finds 3+ consecutive added comment lines; if so, flag a finding for large commented-out code blocks. Record any matches as findings.
 
 ## Step 2: Verify validation was run
 
-Read the verdict file at `autofix-output/.autofix-verdict.json`. This is the authoritative source for validation status.
+Read `autofix-output/.autofix-verdict.json`. If missing, flag a critical finding.
 
-- If the file does not exist, flag a critical finding: "No verdict file found -- implement skill may not have run."
-- If `files_changed` is empty, `null` values for all three fields are acceptable — no code changes to validate.
-- If `files_changed` is non-empty, evaluate each field using the same rule:
-  - `false` → critical finding (that step ran and failed).
-  - `true` → pass.
-  - `null` → check the `observations` array for an explanation of why the step was skipped (e.g., "repo has no linter", "tests require a running cluster"). If an explanation exists, accept `null`. If no explanation exists, flag a critical finding: that step was not run and no justification was provided.
-- Apply this rule identically to `lint_passed`, `build_passed`, and `tests_passed`. Do not treat any of the three differently.
+For each of `lint_passed`, `build_passed`, `tests_passed` (apply the same rule to all three):
+- `false` → critical finding (step ran and failed)
+- `true` → pass
+- `null` with explanation in `observations` → acceptable (no infrastructure for that step)
+- `null` without explanation → critical finding (step skipped without justification)
+
+If `files_changed` is empty (no-code-change verdict), `null` for all three is acceptable.
 
 ## Step 3: Semantic review
 
@@ -104,21 +100,9 @@ Write your findings to `.autofix-context/review-findings.json` as a JSON array:
 ]
 ```
 
-Write an empty array `[]` if no issues are found.
+Each finding must have `severity` (`critical`|`major`|`minor`|`nitpick`), `description`, `file` (empty string if general), and `line` (0 if general). Write `[]` if no issues found. Do not invent problems.
 
-Each finding must include:
-- `severity`: one of `critical`, `major`, `minor`, or `nitpick`
-- `description`: what the issue is
-- `file`: which file (when applicable, empty string if general)
-- `line`: line number (when applicable, 0 if general)
-
-**Severity definitions:**
-- `critical`: wrong logic, security issue, missing requirement, broken tests, test manipulation, no evidence of validation
-- `major`: significant correctness concern, data integrity risk, missing edge case handling, incomplete implementation of a requirement
-- `minor`: style, naming, small cleanup, missing error message improvement
-- `nitpick`: informational, subjective preference, alternative approach suggestion
-
-Be honest. If the fix looks good, write an empty array. Do not invent problems.
+**Severity:** `critical` = wrong logic, security issue, missing requirement, broken tests, test manipulation, no evidence of validation. `major` = correctness concern, missing edge case, data integrity risk. `minor` = style, naming, cleanup. `nitpick` = informational, subjective.
 
 After writing the findings file, validate it against the schema:
 
@@ -131,7 +115,7 @@ uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
 
 ## Gotchas
 
-- If `files_changed` is empty and the verdict is a no-code-change type (`already_fixed`, `not_a_bug`, etc.), mechanical checks are correctly skipped. Do not flag this as an error.
-- Debug print detection (`console.log`, `print(`, etc.) may match legitimate logging. Check the surrounding context before flagging -- only flag prints that look like debugging artifacts.
-- The diff range `HEAD~1..HEAD` assumes the implement skill committed exactly once. In multi-iteration resolve runs where implement commits more than once, only the latest commit is diffed. The verdict's `files_changed` (the primary source) covers all changes regardless of commit count, so this only matters when falling back to git.
-- Do not flag scope creep for changes to shared helpers, types, or test utilities when those files are legitimately needed by the fix.
+- Empty `files_changed` with a no-code-change verdict (`already_fixed`, `not_a_bug`, etc.) is valid. Do not flag it.
+- Debug print detection may match legitimate logging. Check context before flagging.
+- `HEAD~1..HEAD` only covers the latest commit. The verdict's `files_changed` is the primary source and covers all changes regardless of commit count.
+- Changes to shared helpers or test utilities are not scope creep when legitimately needed by the fix.
