@@ -80,6 +80,7 @@ Write the verdict as JSON to `.triage-verdict.json` in the repository root. Use 
 {
   "verdict": "ready | needs_info | not_fixable",
   "confidence": "high | medium | low",
+  "security_sensitive": false,
   "gate1": {
     "repo_url": {
       "pass": true,
@@ -124,6 +125,7 @@ Write the verdict as JSON to `.triage-verdict.json` in the repository root. Use 
 
 - `verdict`: One of `"ready"`, `"needs_info"`, `"not_fixable"`.
 - `confidence`: Your confidence in the verdict. `"high"` = clear-cut. `"medium"` = reasonable but some uncertainty. `"low"` = borderline call.
+- `security_sensitive`: Boolean. `true` if the bug describes a potential security vulnerability (auth bypass, injection, privilege escalation, data exposure, cryptographic weakness, supply chain concern, etc.). `false` for purely functional, cosmetic, or performance bugs. When `true`, the orchestrator requires human approval before autofix proceeds.
 - `gate1`, `gate2`, `gate3`: Assessment of each gate with pass/fail and notes.
 - `gate1.repo_url.value`: The repo URL from the ticket. Always present (the orchestrator pre-filters tickets without a URL).
 - `gate3.not_fixable_reason`: One of `"requires_design_decisions"`, `"requires_infrastructure"`, `"systemic_architectural"`, `"needs_runtime_investigation"`, `"performance"`, `"non_code_fix"`, or `null` if Gate 3 passes.
