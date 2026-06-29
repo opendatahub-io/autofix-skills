@@ -43,14 +43,6 @@ metadata:
 ```
 
 Paths are space-separated. Directories end with `/`. The `x-` prefix follows the convention for custom extension fields, keeping the format spec-compliant. When adding a new skill, always include artifact declarations for any files or directories the skill creates, reads as scaffold context, or that should be excluded from git commits.
-
-## Commit Trailers
-
-Autonomous agent commits must comply with DCO best practices:
-
-- **Never** add a `Signed-off-by` trailer — autonomous agents cannot certify the DCO because no human reviewed the code.
-- **Never** add `Co-Authored-By`. Instead, add an `Assisted-by` trailer to identify the AI tool (e.g. `Assisted-by: Claude claude-opus-4-6 <noreply@anthropic.com>`).
-
 ## Naming Convention
 
 Skills in this plugin use the `autofix-` prefix (e.g., `autofix-resolve`) instead of the `jira-autofix-` prefix used by the original skills in `ai-helpers`. This avoids name collisions — both plugins can be active simultaneously on the container image.
