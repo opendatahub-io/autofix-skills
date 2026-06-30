@@ -61,7 +61,8 @@ Before committing, run the repo's lint, build, and test commands:
 3. If no conventions exist, use the fallback format: `<TICKET-KEY>: <SUMMARY>`
 4. Check for a PR template — look at `.github/pull_request_template.md` first, then check `CONTRIBUTING.md` or repo docs for guidance on PR format. If a template is found, use it to structure the commit message body — fill in sections, strip HTML comments, replace placeholder text.
 5. Always ensure the ticket key appears somewhere in the commit message.
-6. Do not add trailers (Signed-off-by, Co-Authored-By, etc.) unless the repo's conventions explicitly require them.
+6. Never add a `Signed-off-by` trailer — autonomous agents cannot certify the DCO.
+7. Do not add `Co-Authored-By`. Instead, always add an `Assisted-by` trailer to identify the AI tool (e.g. `Assisted-by: Claude claude-opus-4-6 <noreply@anthropic.com>`).
 
 ## Step 7: Write Verdict
 
