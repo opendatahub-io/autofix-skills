@@ -55,6 +55,10 @@ Before committing, run the repo's lint, build, and test commands:
 - NEVER use `git add -A`, `git add .`, or `git add --all` — these stage every file in the working tree and can include unintended files (secrets, credentials, build artifacts).
 - Run `git status` after staging to verify only your intended files are staged.
 
+**Amend vs. new commit (resolve mode):**
+- In **resolve mode** (first autofix run, not an iteration), if this is a subsequent implement invocation — you are addressing review findings from `.autofix-context/review-findings.json`, not making the initial implementation — amend the previous commit instead of creating a new one. Use `git commit --amend` with the updated commit message. This produces a single clean commit on the branch.
+- In **iterate mode** (addressing MR/PR feedback), always create a new commit — separate commits per iteration are expected.
+
 **Commit message format:**
 1. Check the target repo's `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, and commit message hooks for commit format conventions.
 2. If the repo specifies a format (e.g. Conventional Commits), follow it and include the ticket key where the format allows (trailer, scope, or body).
@@ -89,7 +93,7 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 ```
 
 **Verdict values** (canonical set — must match `verdict.py`):
-- `committed`: Fix implemented, validated, and committed **in this invocation**. Only use this if you ran `git commit` and created a new commit during this session. Do not use `committed` just because commits from previous iterations exist on the branch.
+- `committed`: Fix implemented, validated, and committed **in this invocation**. Only use this if you ran `git commit` (or `git commit --amend` in resolve mode) during this session. Do not use `committed` just because commits from previous iterations exist on the branch.
 - `already_fixed`: Bug is already fixed in the current codebase (resolve mode), or review feedback was already addressed by previous iterations (iterate mode)
 - `not_a_bug`: Reported behavior is by design or an RFE
 - `insufficient_info`: Ticket lacks detail to attempt a fix
