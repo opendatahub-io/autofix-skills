@@ -40,7 +40,18 @@ Store the ticket key in state:
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml ticket_key {TICKET_KEY}
 ```
 
-## Step 2: Call implement agent
+## Step 2: Rebase onto target (iterate mode only)
+
+Skip this step in resolve mode.
+
+The feature branch may be behind the target branch. Rebase it so the implement agent works on up-to-date code.
+
+1. Determine the target branch: read `.autofix-context/branch-resolution.json` and use the `resolved_branch` field. If the file is missing or has no `resolved_branch`, fall back to `git rev-parse --abbrev-ref origin/HEAD | sed 's|^origin/||'`.
+2. Check if rebase is needed: `git merge-base --is-ancestor "origin/$target" HEAD`. If exit code 0, the branch is already up-to-date -- skip to Step 3.
+3. Read `prompts/rebase-agent.md` from this skill's directory and follow its instructions, passing `origin/$target` as the target ref.
+4. If the rebase agent reports failure (unresolvable conflicts), write a `blocked` verdict to `autofix-output/.autofix-verdict.json` with the reason and stop.
+
+## Step 3: Call implement agent
 
 Update state and read the implement agent prompt:
 ```bash
@@ -54,7 +65,7 @@ Read `prompts/implement-agent.md` from this skill's directory and follow its ins
 
 If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_implement` in their `hooks`, invoke each one using the Skill tool (the `/` command) with its configured `args`. For example, invoke the skill: `/preflight --local --fix --skip-review coderabbit`. Do NOT search the filesystem for skills — they are Claude Code skills discovered from the workspace's `.claude/skills/` directory and invoked via the Skill tool. Skills listed as plain strings (no hooks field) run at all hook points with no args. Extensions read from `.autofix-context/` and write findings to `.autofix-context/extension-findings/<skill-name>.json`.
 
-## Step 3: Call review agent
+## Step 4: Call review agent
 
 Update state:
 ```bash
@@ -76,7 +87,7 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/merge_findings.py
 
 This merges `.autofix-context/review-findings.json` with any files in `.autofix-context/extension-findings/` and writes `.autofix-context/all-findings.json`.
 
-## Step 4: Evaluate findings and decide
+## Step 5: Evaluate findings and decide
 
 Update state:
 ```bash
@@ -85,7 +96,7 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml pha
 
 Read `.autofix-context/all-findings.json` (falls back to `review-findings.json` if `all-findings.json` doesn't exist).
 
-**If no findings (empty array):** Proceed to Step 5.
+**If no findings (empty array):** Proceed to Step 6.
 
 **If highest severity is `critical` or `major`:** Call implement agent again with the findings, then review again.
 
@@ -102,7 +113,7 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml ite
 
 When the cap is reached, determine the verdict from the current state (committed/blocked/no_changes/insufficient_info).
 
-## Step 5: Write verdict
+## Step 6: Write verdict
 
 ```bash
 python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml phase done
