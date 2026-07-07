@@ -86,8 +86,8 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 ```
 
 **Verdict values** (canonical set — must match `verdict.py`):
-- `committed`: Fix implemented, validated, and committed
-- `already_fixed`: Bug is already fixed in the current codebase
+- `committed`: Fix implemented, validated, and committed **in this invocation**. Only use this if you ran `git commit` and created a new commit during this session. Do not use `committed` just because commits from previous iterations exist on the branch.
+- `already_fixed`: Bug is already fixed in the current codebase (resolve mode), or review feedback was already addressed by previous iterations (iterate mode)
 - `not_a_bug`: Reported behavior is by design or an RFE
 - `insufficient_info`: Ticket lacks detail to attempt a fix
 - `blocked`: Cannot proceed (missing dependencies, infra requirements, etc.)
