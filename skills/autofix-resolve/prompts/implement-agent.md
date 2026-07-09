@@ -125,6 +125,10 @@ If validation errors occur, fix the JSON and re-run. The script coerces common t
 - Note pre-existing issues in observations rather than fixing them.
 - If CI fails for reasons unrelated to your change (flaky tests, bot policy checks, infrastructure timeouts, missing secrets, unrelated test suites), do not attempt to fix them. Use the `ci_blocked` verdict and describe what failed. Do not modify CI configs, PR templates, or test infrastructure to work around unrelated failures.
 
+**No GitHub workflow modifications:**
+- Never modify files under `.github/workflows/`. GitHub App tokens lack the `workflows` permission, so pushes that include workflow file changes are rejected by the remote, wasting the entire run.
+- If the ticket explicitly asks for a workflow change, set the verdict to `blocked` with a blocker entry like `"GitHub workflow file changes require human PR submission (missing workflows permission)"`.
+
 **Test integrity:**
 - If an existing test fails after the code change, fix the code, not the test.
 - The ONLY exception is when the ticket explicitly describes changing behavior that the test asserts.
