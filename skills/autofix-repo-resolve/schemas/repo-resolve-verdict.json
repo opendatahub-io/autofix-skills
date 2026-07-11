@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Repo Resolve Verdict",
+  "description": "Target repository disambiguation verdict from autofix-repo-resolve skill.",
+  "$comment": "Exactly one candidate must be classified as 'target', and target_url must match that candidate's url. JSON Schema cannot enforce these cross-field relationships; write_json.py enforces them as a post-validation step.",
+  "type": "object",
+  "required": ["target_url", "confidence", "reasoning", "candidates"],
+  "additionalProperties": false,
+  "properties": {
+    "target_url": {
+      "type": "string",
+      "pattern": "^https://"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "reasoning": {
+      "type": "string",
+      "minLength": 10
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["url", "classification"],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "classification": {
+            "type": "string",
+            "enum": ["target", "contextual", "negative", "unclear"]
+          }
+        }
+      }
+    }
+  }
+}
