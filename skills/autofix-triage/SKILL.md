@@ -6,7 +6,7 @@ description: >-
   rubric. Designed for CI pipeline use with the autofix pipeline orchestrator.
 allowed-tools: Read Grep Glob Write Bash
 metadata:
-  x-artifacts: "agent-output.txt .autofix-context/ .triage-context/ .triage-verdict.json"
+  x-artifacts: "agent-output.txt .triage-context/ .triage-verdict.json"
 ---
 
 # Skill: Triage Bug Readiness
@@ -15,7 +15,7 @@ You are assessing a Jira bug ticket for AI autofix readiness. Your goal is to de
 
 ## Step 1: Parse the ticket content
 
-Read the ticket from `.autofix-context/ticket.json` (written by the pipeline orchestrator). Extract:
+Read the ticket from `.triage-context/ticket.json` (written by the pipeline orchestrator). Extract:
 
 - What the reporter claims is broken (the symptom)
 - Where they believe the bug is (component, feature area, file paths)

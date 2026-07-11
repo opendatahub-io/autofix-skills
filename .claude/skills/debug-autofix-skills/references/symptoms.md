@@ -14,7 +14,7 @@ Known failure patterns from this repo's history. Update this file when fixing bu
 
 ### Triage skill reads ticket from wrong source
 - **Likely cause**: Triage skill expected ticket key as CLI argument but the outer layer writes it to a context file. Fixed by RHAIFIRST-61.
-- **Where to look**: `skills/autofix-triage/SKILL.md`, `.autofix-context/ticket.json`
+- **Where to look**: `skills/autofix-triage/SKILL.md`, `.triage-context/ticket.json`
 
 ## Verdict and schema
 
