@@ -42,7 +42,7 @@ Each test case provides a self-contained `input.yaml` that embeds all case data.
 
 The setup script reads `input.yaml` and writes:
 
-- **`.autofix-context/ticket.json`** (always): Created from the `ticket` field. Contains `key`, `summary`, `description`, `labels`, `priority`.
+- **`.triage-context/ticket.json`** (always): Created from the `ticket` field. Contains `key`, `summary`, `description`, `labels`, `priority`.
 
 - **`.triage-context/ARCHITECTURE.md`** (optional): Created from the `architecture` field. Pre-generated architecture overview for code exploration.
 
@@ -139,4 +139,4 @@ The most valuable evaluation criteria are:
 
 ### External Services
 
-The triage skill does not call external APIs. All context is provided statically via `.autofix-context/ticket.json` and the codebase files. Tool interception blocks any Jira API calls.
+The triage skill does not call external APIs. All context is provided statically via `.triage-context/ticket.json` and the codebase files. Tool interception blocks any Jira API calls.
