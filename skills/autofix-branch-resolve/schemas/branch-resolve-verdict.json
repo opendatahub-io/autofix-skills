@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Branch Resolve Verdict",
+  "description": "Target branch disambiguation verdict from autofix-branch-resolve skill.",
+  "type": "object",
+  "required": ["target_branch", "confidence", "reasoning"],
+  "additionalProperties": false,
+  "properties": {
+    "target_branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "reasoning": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

@@ -16,6 +16,9 @@ skills/                      Skill directories (each contains SKILL.md + prompts
   autofix-repo-resolve/      Repo URL disambiguation for multi-URL tickets
     schemas/                 repo-resolve-verdict.json
     scripts/                 write_json.py, validate_verdict.py
+  autofix-branch-resolve/    Branch disambiguation for ambiguous target branches
+    schemas/                 branch-resolve-verdict.json
+    scripts/                 write_json.py, validate_verdict.py
 hooks/                       Claude Code event hooks
   hooks.json                 SessionStart hook for context-compression recovery
 ```
