@@ -67,18 +67,14 @@ Read the verdict file at `autofix-output/.autofix-verdict.json`. This is the aut
 - If the file does not exist, flag a critical finding: "No verdict file found -- implement skill may not have run."
 - If `files_changed` is empty, `null` values for all three fields are acceptable — no code changes to validate.
 - If `files_changed` is non-empty, evaluate each field using the same rule:
-  - `false` → critical finding (that step ran and failed). Exception: if the only failure is a tool that could not execute (exit code 126 or 127, `exec format error`, a missing shared library, a crash before any check ran), the step did not run. Classify it as a missing toolchain, as described under `null` below.
+  - `false` → critical finding (that step ran and failed because of the change). Exception: if the observations show that the only failure is an environment gap (a tool that could not execute, or a `Pre-existing failure:` for that step), treat the field as `null` and classify it below.
   - `true` → pass.
   - `null` → find the explanation for that step in the `observations` array, then classify it:
     - **No local test infrastructure** (for example "repo has no linter", "tests require a running cluster", YAML-only repo): accept `null`.
-    - **Sandbox skip** (observation starts with `Sandbox skip:`): accept `null` only when all of these are true:
-      1. The skipped part needs a capability that the sandbox blocks by design: a container runtime or image build (`podman`, `docker`, `buildah`), a network namespace or other privileged kernel feature (`unshare --net`, `ip netns`, `mount`), or a running cluster or remote service.
-      2. The observation lists the runnable subsets that ran instead, and each one passed.
-      3. The subsets are complete. Read the documented step's definition statically (Makefile recipe and prerequisite targets, `tox.ini`, `.pre-commit-config.yaml`) and confirm that every part that does not need the blocked capability is in the list.
-
-      If any condition fails, flag a critical finding that names the skipped step and the missing or failed subset.
-    - **Known image gap: Go** (observation starts with `Missing toolchain (image gap):` and the missing tool is `go` or a Go-based tool that needs it): the sandbox image does not ship Go yet, so accept `null` for those steps instead of flagging a finding. This takes precedence over the Missing toolchain rule below, for Go only. Compensate in Step 3: read every changed Go file as a compiler would (unused or missing imports, undefined identifiers, wrong signatures or types, unhandled errors), and flag what you find at its normal severity. If the verdict `risks` do not say that the Go checks did not run in the sandbox, flag a `minor` finding.
-    - **Missing toolchain** (observation starts with `Missing toolchain:`, or says that a language runtime, interpreter version, compiler, linter or formatter is not installed or cannot execute): flag a critical finding when the missing tool builds, lints or tests any file in `files_changed`. Name the tool and the step that could not run. Accept `null` only when the tool covers none of the changed files (for example `shfmt` is missing and no shell script changed). A missing tool is never a sandbox skip, even when the observation calls it one. If the tool is a Python dev tool on PyPI (for example `pytest`, `tox`, `mypy`) and the observation shows no failed `uv run --with`, `uvx` or `uv tool run` attempt, the finding must tell the implement agent to run the step through `uv` (for example `uv run --with pytest python3 -m pytest`) instead of reporting it missing. A step that ran through `uv` counts as run: judge its field as `true` or `false` like any other step.
+    - **Environment gap** (observation starts with `Sandbox skip:`, `Missing toolchain:` or `Pre-existing failure:`): accept `null`. The environment never blocks a fix, so do not raise a finding for the gap itself, even at the implementation cap. Instead:
+      1. If a toolchain is missing for changed code, read every changed file in that language as a compiler would (unused or missing imports, undefined identifiers, wrong signatures or types, unhandled errors) and flag real defects at their normal severity.
+      2. For a `Pre-existing failure:`, check the evidence. If the failure points at a file in `files_changed` or at lines the change touched, it is caused by the change: flag a critical finding.
+      3. If the verdict `risks` do not list the checks that did not run in full, or a missing PyPI dev tool (for example `pytest`, `tox`) shows no `uv` attempt, flag a `nitpick` so it is noted without another pass.
     - **No explanation**: flag a critical finding: that step was not run and no justification was provided.
 - Apply this rule identically to `lint_passed`, `build_passed`, and `tests_passed`. Do not treat any of the three differently.
 
@@ -123,7 +119,7 @@ Each finding must include:
 - `line`: line number (when applicable, 0 if general)
 
 **Severity definitions:**
-- `critical`: wrong logic, security issue, missing requirement, broken tests, test manipulation, no evidence of validation
+- `critical`: wrong logic, security issue, missing requirement, broken tests, test manipulation, a check skipped with no explanation (environment gaps with a note are not critical)
 - `major`: significant correctness concern, data integrity risk, missing edge case handling, incomplete implementation of a requirement
 - `minor`: style, naming, small cleanup, missing error message improvement
 - `nitpick`: informational, subjective preference, alternative approach suggestion
@@ -144,5 +140,5 @@ uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
 - If `files_changed` is empty and the verdict is a no-code-change type (`already_fixed`, `not_a_bug`, etc.), mechanical checks are correctly skipped. Do not flag this as an error.
 - Debug print detection (`console.log`, `print(`, etc.) may match legitimate logging. Check the surrounding context before flagging -- only flag prints that look like debugging artifacts.
 - The diff range `HEAD~1..HEAD` assumes the implement skill committed exactly once. In multi-iteration resolve runs where implement commits more than once, only the latest commit is diffed. The verdict's `files_changed` (the primary source) covers all changes regardless of commit count, so this only matters when falling back to git.
-- A documented step that the sandbox cannot run by design does not block the review when all its runnable subsets passed. A missing tool for the changed code always blocks it. Do not let a well-worded explanation turn a missing tool into an accepted skip.
+- Environment gaps (sandbox skips, missing toolchains, pre-existing failures) never block the review. Judge the code itself, and flag a gap only when it hides a failure the change caused. Do not let a well-worded note hide a real failure in changed code.
 - Do not flag scope creep for changes to shared helpers, types, or test utilities when those files are legitimately needed by the fix.

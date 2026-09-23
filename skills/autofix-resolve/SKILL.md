@@ -113,6 +113,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml ite
 
 When the cap is reached, determine the verdict from the current state (committed/blocked/no_changes/insufficient_info).
 
+Environment gaps (`Sandbox skip:`, `Missing toolchain:`, `Pre-existing failure:` observations) never make the verdict `blocked`. If the fix is committed and no open finding is a defect in the change itself, the verdict is `committed`, with the gaps listed in `risks` and `observations`.
+
 ## Step 6: Write verdict
 
 ```bash
