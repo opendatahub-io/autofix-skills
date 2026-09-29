@@ -93,6 +93,7 @@ The review agent accepts these notes without raising a finding. Report every gap
 5. Always ensure the ticket key appears somewhere in the commit message.
 6. Never add a `Signed-off-by` trailer — autonomous agents cannot certify the DCO.
 7. Do not add `Co-Authored-By`. Instead, always add an `Assisted-by` trailer to identify the AI tool (e.g. `Assisted-by: Claude claude-opus-4-6 <noreply@anthropic.com>`).
+8. Never set or override the commit identity: no `git -c user.name=...` or `-c user.email=...`, no `--author`, no `GIT_AUTHOR_*` or `GIT_COMMITTER_*` variables and no `git config user.*`. The repository is already configured with the bot identity, and a commit made under any other identity is rejected after the run. The `Assisted-by` trailer is the only place to name the AI tool.
 
 ## Step 7: Write Verdict
 
