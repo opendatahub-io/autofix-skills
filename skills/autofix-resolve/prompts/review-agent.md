@@ -85,8 +85,12 @@ For each file in the diff:
 - **Relevance**: Can you justify why this file was changed for this ticket? Do not flag files just because they were not named in the ticket -- fixes often touch shared helpers, types, or callers.
 - **Correctness**: Is the logic right? Are there off-by-one errors, nil pointer risks, race conditions, or missing error handling?
 - **Completeness**: Does the fix address the full scope of the ticket, or only part of it?
+  - An externally verifiable criterion is an acceptance criterion (or ticket requirement) whose evidence exists only outside the repository and the sandbox, for example a published image or its SBOM/CVE scan, an external CI or release pipeline run, a deployed environment, a live cluster or service, or a manual check by a person. It counts as met for review purposes when its in-repository part is done.
+  - Do not raise a critical, major or minor finding because that external evidence is missing. If the verdict lacks a `Not verifiable in sandbox:` observation or a `risks` entry for the criterion, raise a `nitpick` so it is noted without another pass.
+  - If a `Not verifiable in sandbox:` note covers a criterion whose evidence is in the repository or can be produced in the sandbox (for example a file's contents or a test that can run), it is not externally verifiable: treat it as a normal requirement at normal severity.
+  - Still flag real defects in the change at their normal severity, including a change that would make the external check fail (for example, removing something the criterion needs).
 - **Test manipulation**: Did the agent modify test expectations instead of fixing code? This is a critical finding unless the ticket explicitly describes changing behavior.
-- **Scope creep**: Did the agent refactor unrelated code, add unnecessary imports, or make "improvements" beyond the ticket scope?
+- **Scope creep**: Did the agent refactor unrelated code, add unnecessary imports, or make "improvements" beyond the ticket scope? New verification scripts, gates or docs that stand in for an external check the ticket did not ask for are scope creep: `minor` at most, never `critical` or `major` on their own.
 - **Simplicity**: Is there a simpler way to achieve the same result?
 
 ## Step 4: Write findings
@@ -119,8 +123,8 @@ Each finding must include:
 - `line`: line number (when applicable, 0 if general)
 
 **Severity definitions:**
-- `critical`: wrong logic, security issue, missing requirement, broken tests, test manipulation, a check skipped with no explanation (environment gaps with a note are not critical)
-- `major`: significant correctness concern, data integrity risk, missing edge case handling, incomplete implementation of a requirement
+- `critical`: wrong logic, security issue, missing requirement (not an externally verifiable criterion whose in-repository part is done), broken tests, test manipulation, a check skipped with no explanation (environment gaps with a note are not critical)
+- `major`: significant correctness concern, data integrity risk, missing edge case handling, incomplete implementation of a requirement (not an externally verifiable criterion whose in-repository part is done)
 - `minor`: style, naming, small cleanup, missing error message improvement
 - `nitpick`: informational, subjective preference, alternative approach suggestion
 
@@ -141,4 +145,5 @@ uv run --script ${CLAUDE_SKILL_DIR}/scripts/write_json.py \
 - Debug print detection (`console.log`, `print(`, etc.) may match legitimate logging. Check the surrounding context before flagging -- only flag prints that look like debugging artifacts.
 - The diff range `HEAD~1..HEAD` assumes the implement skill committed exactly once. In multi-iteration resolve runs where implement commits more than once, only the latest commit is diffed. The verdict's `files_changed` (the primary source) covers all changes regardless of commit count, so this only matters when falling back to git.
 - Environment gaps (sandbox skips, missing toolchains, pre-existing failures) never block the review. Judge the code itself, and flag a gap only when it hides a failure the change caused. Do not let a well-worded note hide a real failure in changed code.
+- Externally verifiable criteria never block the review. Judge the in-repository change; missing external evidence is at most a `nitpick` (for a missing `Not verifiable in sandbox:` observation or `risks` entry), and stand-in verification tooling the ticket did not ask for is scope creep.
 - Do not flag scope creep for changes to shared helpers, types, or test utilities when those files are legitimately needed by the fix.

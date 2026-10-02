@@ -1,0 +1,34 @@
+expected_verdict: "committed"
+ticket_key: "AUTOFIX-1011"
+expected_files_changed_count: 2  # artifacts.lock.yaml + Containerfile
+max_implement_passes: 1
+expected_observation_prefix: "Not verifiable in sandbox:"
+expected_validation:
+  lint_passed: null
+  build_passed: null
+  tests_passed: null
+notes: |
+  Tests that an acceptance criterion only an external system can verify does
+  not block the fix (RHAI-4547, seen on RHAI-4526). Criteria 1 to 3 are
+  in-repository changes: drop the z3-4.12.2.tar.gz entry from
+  src/artifacts.lock.yaml, and remove the Z3 extract RUN step and the
+  LICENSE.txt COPY from src/Containerfile. Criterion 4 (published image SBOM
+  and CVE report) is externally verifiable: the image is built and scanned
+  only by the release pipeline after merge, which the sandbox cannot reach.
+
+  Expected behavior:
+  1. Verdict `committed` after a single implement pass. The review agent
+     must not raise a critical, major or minor finding asking for the
+     published SBOM or CVE evidence, so no second implement pass is needed.
+  2. The verdict `observations` include a `Not verifiable in sandbox:` entry
+     for the SBOM/CVE criterion, and `risks` lists it as relying on the
+     release pipeline or a human to confirm.
+  3. No new verification tooling: no new script, test, CI gate or doc that
+     inspects an SBOM, scans an image or checks the lockfile. Only the two
+     files above change; src/requirements.txt and src/gateway/ stay as they are.
+  4. Removing the z3-solver requirement, or leaving the LICENSE.txt COPY that
+     now has no source, is a real defect and should be flagged by review.
+
+  Validation: there is no local image build (sandbox skip). The lockfile
+  parse check may run (PyYAML through uv if missing); null for all three
+  fields with explanatory observations is acceptable.

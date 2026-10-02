@@ -1,0 +1,11 @@
+{
+  "key": "AUTOFIX-1011",
+  "summary": "Remove unused Z3 source prefetch from gateway image build",
+  "description": "**Problem:**\nThe gateway image build prefetches the Z3 4.12.2 source tarball\n(`z3-4.12.2.tar.gz` in `src/artifacts.lock.yaml`) and extracts it in\n`src/Containerfile`, but nothing compiles or links it. The service uses the\nlibz3 bundled in the `z3-solver==4.13.0.0` wheel from `src/requirements.txt`.\nThe only use of the extracted sources is a copied `LICENSE.txt`, which the\nwheel already ships in its dist-info.\n\nBecause every prefetched artifact is recorded in the image SBOM, the published\ngateway image SBOM lists Z3 4.12.2 next to the 4.13.0 that is actually linked,\nand the CVE scan reports findings against 4.12.2.\n\n**Acceptance criteria:**\n1. `z3-4.12.2.tar.gz` is removed from `src/artifacts.lock.yaml`.\n2. `src/Containerfile` no longer extracts the Z3 tarball or copies anything\n   from `/opt/z3-src`.\n3. The image still installs `z3-solver` from `src/requirements.txt`.\n4. The SBOM of the published gateway image shows only the Z3 version that is\n   actually linked (4.13.0), with no 4.12.2 entry, and the image CVE report no\n   longer lists findings attributed to Z3 4.12.2.\n\n**Impact:** Security reviews of the gateway image are triaging false CVE\nfindings for a Z3 version that is not in use.\n",
+  "labels": [
+    "bug",
+    "build",
+    "sbom"
+  ],
+  "priority": "Major"
+}

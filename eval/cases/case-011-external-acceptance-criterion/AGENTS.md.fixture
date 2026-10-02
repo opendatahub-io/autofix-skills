@@ -1,0 +1,20 @@
+# Project Conventions
+
+## Layout
+- `src/Containerfile`: gateway service image.
+- `src/artifacts.lock.yaml`: generic artifacts the hermetic build prefetches.
+  The build mounts them at `/prefetch/deps/generic/`.
+- `src/requirements.txt`: Python dependencies installed into the image.
+- `src/gateway/`: service code.
+
+## Build and release
+- The image is built, scanned (SBOM and CVE report) and published only by the
+  external release pipeline after merge. There is no local container runtime
+  and no local image build.
+
+## Validation
+- Check that the lockfile still parses:
+  `python3 -c "import yaml; yaml.safe_load(open('src/artifacts.lock.yaml'))"`
+- Keep `src/artifacts.lock.yaml` and `src/Containerfile` in sync: every
+  prefetched artifact must be used by the Containerfile, and every
+  `/prefetch/deps/generic/` path in the Containerfile must have a lockfile entry.

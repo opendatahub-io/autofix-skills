@@ -1,0 +1,29 @@
+# Gateway service image. Built hermetically by the release pipeline: generic
+# artifacts listed in artifacts.lock.yaml are mounted at /prefetch/deps/generic.
+FROM registry.example.com/base/python-312:latest AS builder
+
+USER 0
+WORKDIR /build
+
+# zstd is built from source because the base image ships an older release.
+RUN tar -xzf /prefetch/deps/generic/zstd-1.5.6.tar.gz && \
+    make -C zstd-1.5.6 -j"$(nproc)" PREFIX=/opt/zstd install
+
+# Native Z3 sources.
+RUN mkdir -p /opt/z3-src && \
+    tar -xzf /prefetch/deps/generic/z3-4.12.2.tar.gz -C /opt/z3-src --strip-components=1
+
+COPY requirements.txt /build/requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r /build/requirements.txt
+
+FROM registry.example.com/base/python-312:latest
+
+COPY --from=builder /opt/zstd /opt/zstd
+COPY --from=builder /install /usr/local
+COPY --from=builder /opt/z3-src/LICENSE.txt /usr/share/licenses/z3/LICENSE.txt
+COPY gateway/ /app/gateway/
+
+ENV LD_LIBRARY_PATH=/opt/zstd/lib
+WORKDIR /app
+USER 1001
+ENTRYPOINT ["python3", "-m", "gateway.policy"]

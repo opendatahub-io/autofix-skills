@@ -96,6 +96,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml pha
 
 Read `.autofix-context/all-findings.json` (falls back to `review-findings.json` if `all-findings.json` doesn't exist).
 
+First set aside any `critical` or `major` finding whose only asks are external evidence, or stand-in verification tooling the ticket did not request, for an externally verifiable criterion: an acceptance criterion (or ticket requirement) whose evidence exists only outside the repository and the sandbox, for example a published image or its SBOM/CVE scan, an external CI or release pipeline run, a deployed environment, a live cluster or service, or a manual check by a person. Such a finding does not trigger another implement pass. Handle it like a nitpick and decide on the remaining findings:
+
 **If no findings (empty array):** Proceed to Step 6.
 
 **If highest severity is `critical` or `major`:** Call implement agent again with the findings, then review again.
@@ -114,6 +116,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/state.py set tmp/orchestrator-state.yaml ite
 When the cap is reached, determine the verdict from the current state (committed/blocked/no_changes/insufficient_info).
 
 Environment gaps (`Sandbox skip:`, `Missing toolchain:`, `Pre-existing failure:` observations) never make the verdict `blocked`. If the fix is committed and no open finding is a defect in the change itself, the verdict is `committed`, with the gaps listed in `risks` and `observations`.
+
+Externally verifiable criteria never make the verdict `blocked` either, at the cap or before it. If the fix is committed and no open finding is a defect in the change itself, the verdict is `committed`, with each such criterion listed in `risks` and in a `Not verifiable in sandbox:` observation.
 
 ## Step 6: Write verdict
 
