@@ -1,0 +1,3 @@
+# The z3-solver wheel bundles its own libz3 build (Z3 4.13.0).
+z3-solver==4.13.0.0
+zstandard==0.23.0

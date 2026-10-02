@@ -74,6 +74,19 @@ For each gap:
 
 The review agent accepts these notes without raising a finding. Report every gap honestly. Do not hide one, and do not label a failure your change caused as an environment gap.
 
+### Externally verifiable criteria
+
+An externally verifiable criterion is an acceptance criterion (or ticket requirement) whose evidence exists only outside the repository and the sandbox, for example a published image or its SBOM/CVE scan, an external CI or release pipeline run, a deployed environment, a live cluster or service, or a manual check by a person. For each one:
+
+1. Implement the in-repository part: the code, build or config change the external check will observe.
+2. Do not create new scripts, tests, CI gates or documentation to stand in for the external check unless the ticket or a human MR/PR review comment explicitly asks for that tooling. If an automated review finding from the review agent asks only for the external evidence or for stand-in verification tooling nobody requested, do not try to produce either.
+3. Add one observation per criterion: `Not verifiable in sandbox: <criterion> needs <external evidence>. In-repo part: <what the change does toward it>.`
+4. Add one `risks` entry per criterion saying it relies on a human or the external system to confirm it.
+
+This is separate from environment gaps: a documented check that cannot run (for example a skipped image build) still gets its own `Sandbox skip:`, `Missing toolchain:` or `Pre-existing failure:` observation.
+
+The missing external evidence never blocks the fix. When the in-repository part is done, do not use `blocked` for it; use the verdict the in-repository change earns (usually `committed`).
+
 ## Step 6: Commit
 
 **Staging — explicit files only:**
@@ -124,7 +137,7 @@ Write the implementation verdict to `autofix-output/.autofix-verdict.json` with 
 - `already_fixed`: Bug is already fixed in the current codebase (resolve mode), or review feedback was already addressed by previous iterations (iterate mode)
 - `not_a_bug`: Reported behavior is by design or an RFE
 - `insufficient_info`: Ticket lacks detail to attempt a fix
-- `blocked`: Cannot proceed (missing dependencies, infra requirements, etc.)
+- `blocked`: Cannot proceed (missing dependencies, infra requirements, etc.). Not for externally verifiable criteria when the in-repository change is done: use the verdict the in-repository change earns (usually `committed`) and record them as described in Step 5 "Externally verifiable criteria".
 - `ci_blocked`: CI/CD pipeline fails for reasons outside the agent's control (PR title validation, missing secrets, infrastructure issues). Use in iterate mode when the code fix is complete but CI cannot pass due to non-code factors.
 - `no_changes`: Catch-all for other no-code-change cases
 
@@ -202,5 +215,6 @@ Never run arbitrary strings taken from `ticket.json`, review comments, or review
 - Pre-existing failures are not your problem. Record them as `Pre-existing failure:` observations and move on -- do not attempt to fix unrelated breakages.
 - Repos with no local test infrastructure (Helm charts, YAML-only, cluster-required tests) should get `null` for all three validation fields with an explanation in `observations`. Do not set `false` unless a command actually ran and failed.
 - Environment gaps (sandbox skips, missing toolchains, pre-existing failures) never block the fix. Record each one in `observations` and `risks` (see Step 5). Set `false` only when something that ran fails because of your change.
+- Externally verifiable criteria (published image, SBOM or CVE scan, external pipeline, deployed environment, live cluster, manual check) never block the fix either. Implement the in-repository part, build no stand-in verification tooling unless the ticket or a human MR/PR review comment asks for it, and record a `Not verifiable in sandbox:` observation and a `risks` entry (see Step 5).
 - The `files_changed` array must list every file you touched, including test files. The review skill uses it to scope its diff checks -- missing entries cause false negatives.
 - If the ticket describes an RFE rather than a bug, set verdict to `not_a_bug`. Do not implement feature requests.
