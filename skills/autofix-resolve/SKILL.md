@@ -65,6 +65,8 @@ Read `prompts/implement-agent.md` from this skill's directory and follow its ins
 
 If `skill-hooks.json` (or `config.json` `extra_skills`) lists extensions with `post_implement` in their `hooks`, invoke each one using the Skill tool (the `/` command) with its configured `args`. For example, invoke the skill: `/preflight --local --fix --skip-review coderabbit`. Do NOT search the filesystem for skills — they are Claude Code skills discovered from the workspace's `.claude/skills/` directory and invoked via the Skill tool. Skills listed as plain strings (no hooks field) run at all hook points with no args. Extensions read from `.autofix-context/` and write findings to `.autofix-context/extension-findings/<skill-name>.json`.
 
+When `.autofix-context/sandbox-profile.json` lists `validate` steps, those steps supersede extension validation hooks: skip an extension whose only job is to run the repo's lint, build or test checks, and add an observation naming it. Extensions that do other work (reviews, policy or convention checks) still run.
+
 ## Step 4: Call review agent
 
 Update state:

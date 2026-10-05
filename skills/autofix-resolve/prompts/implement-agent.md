@@ -40,13 +40,22 @@ Skip this step for simple fixes (typo, nil check, single-line change).
 
 ## Step 5: Validate
 
-Before committing, run the repo's lint, build, and test commands:
+Before committing, run the repo's lint, build, and test commands. If `.autofix-context/sandbox-profile.json` exists, follow "Sandbox profile" below first, and use this list only for checks the profile does not cover:
 
 1. Check `CLAUDE.md`, `AGENTS.md`, and `CONTRIBUTING.md` for documented validation commands.
 2. If no documentation exists, discover commands from standard patterns: `Makefile` targets (`lint`, `test`, `vet`, `build`), `go test ./...`, `pytest`, `tox`, `npm test`, `golangci-lint run`.
 3. If the repo has no local test infrastructure (YAML-only repos, Helm charts, repos where tests require a running cluster), set `lint_passed`, `build_passed`, and `tests_passed` to `null` on the verdict and note what manual verification would be needed in `observations`. This item covers repos that lack the infrastructure, not documented commands that the environment prevents. For those, follow "Checks the environment prevents" below.
 4. Run the discovered commands and fix any failures caused by your change. Set `build_passed` to `true`/`false` if a build command was run, or `null` if the repo has no build step.
 5. If a documented command cannot run in this environment, or fails for a reason outside your change, follow "Checks the environment prevents" below.
+
+### Sandbox profile
+
+If `.autofix-context/sandbox-profile.json` exists, the repo has a sandbox profile, and `/sandbox/.agentic-ci/ENVIRONMENT.md` lists the toolchains it provisioned.
+
+- If the profile lists `validate` steps, they are the repo's validation commands. Run each `run` command in the listed order from the repository root, within its `timeout` (seconds), and fix failures your change caused. Each step's `kind` (`lint`, `build` or `test`) sets the matching verdict field: `true` when every step of that kind passes, `false` when one fails because of your change. A kind with no steps follows the numbered list above. Do not swap in other commands for the listed ones.
+- The harness runs the same steps again after you finish and reports their results on the MR/PR and the Jira ticket, so a failure you leave in place is visible to reviewers.
+- Each `skips` entry (`match`, `reason`) names a check the sandbox cannot run. When a documented check is covered by a skip, do not run it; record it as `Sandbox skip: <documented step> not run: <reason from the profile>. Ran instead: <the profile's validate steps and results>.`
+- Never hand-edit a generated file (for example protobuf stubs, generated clients or rendered docs) because its generator is missing. Change the source, and record `Missing toolchain: <generator> not available to regenerate <files>` so CI or a human regenerates them.
 
 ### Checks the environment prevents
 
