@@ -24,10 +24,6 @@ rules:
         warn: 4000
         error: 8000
 
-  content-critical-position:
-    enabled: true
-    severity: info
-
   # .claude/ is Claude Code config, not a plugin. skillsaw#74 fixed this for
   # marketplace repos but single-plugin repos still detect it as a second plugin.
   plugin-naming:
