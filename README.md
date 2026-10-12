@@ -6,6 +6,10 @@ Claude Code plugin for the Jira autofix pipeline. Provides orchestrator skills, 
 
 This plugin is the **inner layer** of the autofix pipeline, the skills that run inside the Claude Code container. The outer layer (Python orchestration, GitLab CI, ticket management) lives in [jira-autofix](https://gitlab.com/redhat/rhel-ai/agentic-ci/jira-autofix) and [agentic-ci](https://github.com/opendatahub-io/agentic-ci) (generic CI framework).
 
+For development and troubleshooting, read [AGENTS.md](AGENTS.md) for shared
+conventions and [.agents/README.md](.agents/README.md) for the skill authoring
+and debugging guides.
+
 ### Skills
 
 | Skill | Description |
