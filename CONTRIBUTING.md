@@ -18,13 +18,14 @@ Thank you for your interest in contributing to autofix-skills! This plugin provi
 ## Repository Layout
 
 ```text
+.agents/                     Portable agent guidance
+.claude/                     Claude Code project settings
 .claude-plugin/plugin.json   Plugin packaging metadata
-skills/                      Skill directories (SKILL.md + prompts/)
-scripts/                     Deterministic Python utilities called by skills
-hooks/                       Claude Code event hooks
+skills/                      Skill directories (SKILL.md, prompts/, scripts/)
+hooks/                       Plugin SessionStart hook
 ```
 
-Read [AGENTS.md](AGENTS.md) for architecture details and conventions.
+Read [AGENTS.md](AGENTS.md) for architecture details and conventions. `CLAUDE.md` points at that file.
 
 ## Ways to Contribute
 
