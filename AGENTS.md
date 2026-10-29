@@ -25,9 +25,11 @@ skill. The guidance is tool-neutral and applies to any coding agent.
 | `autofix-triage` | Bug readiness verdict: ready, needs_info, or not_fixable |
 | `autofix-repo-resolve` | Pick the target repo when a ticket lists several URLs |
 
-Pipeline skills stay in `skills/`. The plugin installer discovers `skills/`,
-`.claude/skills/`, and `.opencode/skills/`. The marketplace entry for this
-plugin sets no `skills` path.
+Pipeline skills stay in `skills/`. Contributor and development skills
+(`autofix-skills`, `debug-autofix-skills`) live in `.agents/skills/`. The
+plugin installer discovers `skills/`, `.claude/skills/`, and
+`.opencode/skills/`. The marketplace entry for this plugin sets no `skills`
+path.
 
 ## Architecture
 
