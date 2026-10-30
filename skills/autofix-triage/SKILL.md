@@ -114,6 +114,6 @@ For `needs_info` verdicts, `message_to_opener` must reference the specific faile
 ## Gotchas
 
 - **Bias toward ready**: If target ownership is plausible and no evidence points elsewhere, classify as `ready` with `"confidence": "low"` rather than `not_fixable`.
-- **Cross-repo is not automatically ready**: A sibling repository may be accessible to the team but the resolve run works in the selected checkout. If this checkout has no viable part of the fix, use `needs_info` and identify the likely owner. Reserve `systemic_architectural` for a truly external dependency with no target-repo workaround.
+- **Cross-repo is not automatically ready**: A sibling repository may be accessible to the team but the resolve run works in the selected checkout. If this checkout has no viable part of the fix, fail Gate 2 ownership and identify the likely owner; use `needs_info` when Gate 3 passes or `not_fixable` when Gate 3 fails. Reserve `systemic_architectural` for a truly external dependency with no target-repo workaround.
 - **No repo clone is not a hard stop**: If no repo is present in the working directory, set `repo_readiness` fields to `false` with a note and proceed to Step 4 -- do not abort the entire assessment.
 - **Bash scoping**: Bash is available for `git remote get-url origin` and `git log` inspection (Step 3) and verdict validation via `write_json.py` (Step 6). Do not use it for general-purpose investigation or running repo build/test commands.

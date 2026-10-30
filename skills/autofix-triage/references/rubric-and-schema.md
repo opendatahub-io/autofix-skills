@@ -28,7 +28,8 @@ The orchestrator verifies that a repo URL exists before invoking this skill. Ide
   - An error message or log output greppable in the codebase
   - A CRD field name, API endpoint, or UI element name
   - A component name + feature area that narrows to a few directories
-- FAIL: The description is too vague for even code exploration to narrow down, or the named code exists only in another repository. A matching component name alone is not enough.
+  - A locatable version pin or compatibility workaround in the selected checkout, even if the named function is in another repository
+- FAIL: The description is too vague for even code exploration to narrow down, or no viable fix or workaround can be located in the selected checkout. A matching component name alone is not enough.
 
 **Fix direction** -- Does the agent know what "correct" looks like?
 
@@ -46,7 +47,7 @@ The orchestrator verifies that a repo URL exists before invoking this skill. Ide
 
 - PASS: Source and behavior evidence support a fix in the selected target. If ownership is plausible but not certain and no evidence points elsewhere, pass with low confidence and describe the uncertainty.
 - FAIL: Concrete evidence identifies a different implementation repository, while this checkout only deploys an image, configures a service, or calls an API and has no viable workaround. A component-to-repository mapping alone cannot satisfy this check.
-- If the evidence cannot distinguish the selected target from another likely owner, fail with `needs_info` when the ticket must identify the affected code or image before a useful resolve run. Do not infer a different owner from a failed search alone.
+- If the evidence cannot distinguish the selected target from another likely owner, fail this Gate 2 check when the ticket must identify the affected code or image before a useful resolve run. Return `needs_info` if Gate 3 passes. Do not infer a different owner from a failed search alone.
 
 For example, a Feature Store ticket mapped to `opendatahub-io/feast` may concern operator or dashboard code; a Model as a Service ticket mapped to `models-as-a-service` may concern `ai-gateway-payload-processing`. Follow the specific ticket's code, stack trace, package, or image evidence. These examples are ownership checks, not a replacement mapping table.
 
@@ -63,7 +64,7 @@ Even with perfect information, some bugs are not appropriate for automated fixin
 - **performance**: Requires profiling, benchmarking, and potentially architectural changes
 - **non_code_fix**: The resolution is not a code change -- e.g., KCS article update, documentation fix, Jira configuration, or infra/config-only change that the autofix agent cannot make
 
-**Wrong target within the same organization:** A sibling repository is not `systemic_architectural`, but this resolve run operates on the selected checkout. If the defect is in a sibling and there is no viable target-repo fix, fail `gate2.target_repo_ownership` and return `needs_info`. Name the likely owner in `gate2.target_repo_ownership.note`, `gate3.cross_repo` when its URL is known, and `message_to_opener`; ask for the ticket or component mapping to be retargeted. If the selected checkout contains a viable part that fixes the reported behavior, Gate 2 may pass; describe any additional repo work in `gate3.cross_repo` and `gate3.note`.
+**Wrong target within the same organization:** A sibling repository is not `systemic_architectural`, but this resolve run operates on the selected checkout. If the defect is in a sibling and there is no viable target-repo fix, fail `gate2.target_repo_ownership`. Return `needs_info` when Gate 3 passes; if Gate 3 fails, return `not_fixable` under the verdict logic below. Name the likely owner in `gate2.target_repo_ownership.note`, `gate3.cross_repo` when its URL is known, and `message_to_opener`; ask for the ticket or component mapping to be retargeted when Gate 3 passes. If the selected checkout contains a viable part that fixes the reported behavior, Gate 2 may pass; describe any additional repo work in `gate3.cross_repo` and `gate3.note`.
 
 **Truly external dependency:** If evidence shows the fix must happen outside the team's control and there is no viable fix or workaround in the target, fail Gate 3 with `systemic_architectural` and return `not_fixable`. Name the likely external owner in `gate3.note` and `message_to_opener`. Do not use this category solely because another repository is involved.
 

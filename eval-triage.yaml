@@ -87,9 +87,11 @@ traces:
 # Judges — evaluate triage quality
 judges:
   - name: verdict_file_exists
-    description: Verify .triage-verdict.json exists and has required fields
+    description: Verify .triage-verdict.json exists and matches the triage schema
     check: |
       import json
+      from pathlib import Path
+      import jsonschema
       modified = outputs.get("modified_files", {})
       content = modified.get(".triage-verdict.json")
       if not content:
@@ -104,6 +106,11 @@ judges:
       missing = required - set(verdict.keys())
       if missing:
           return False, f"Missing required fields: {missing}"
+      schema = json.loads(Path("skills/autofix-triage/schemas/triage-verdict.json").read_text())
+      try:
+          jsonschema.validate(verdict, schema)
+      except jsonschema.ValidationError as e:
+          return False, f"Verdict does not match triage schema: {e.message}"
       return True, "Verdict file valid with all required fields"
 
   - name: verdict_value_valid
@@ -162,7 +169,7 @@ judges:
       return True, f"Verdict '{v}' is consistent with gate results"
 
   - name: case_expectations
-    description: Verify the verdict and target ownership match case annotations
+    description: Verify verdict, gate outcomes, and target ownership match case annotations
     check: |
       import json
       modified = outputs.get("modified_files", {})
@@ -175,13 +182,30 @@ judges:
       if expected_verdict and verdict.get("verdict") != expected_verdict:
           return False, f"Verdict '{verdict.get('verdict')}' does not match expected '{expected_verdict}'"
 
+      expected_gates = annotations.get("expected_gates", {})
+      actual_gates = {
+          "gate1": all(
+              verdict.get("gate1", {}).get(k, {}).get("pass") is True
+              for k in ("repo_url", "bug_description")
+          ),
+          "gate2": all(
+              verdict.get("gate2", {}).get(k, {}).get("pass") is True
+              for k in ("code_locatability", "fix_direction", "target_repo_ownership")
+          ),
+          "gate3": verdict.get("gate3", {}).get("pass") is True,
+      }
+      for gate, expected in expected_gates.items():
+          actual = "pass" if actual_gates[gate] else "fail"
+          if actual != expected:
+              return False, f"{gate} outcome '{actual}' does not match expected '{expected}'"
+
       expected_ownership = annotations.get("expected_target_repo_ownership")
       if expected_ownership is not None:
           actual_ownership = verdict.get("gate2", {}).get("target_repo_ownership", {}).get("pass")
           if actual_ownership is not expected_ownership:
               return False, f"Target ownership '{actual_ownership}' does not match expected '{expected_ownership}'"
 
-      return True, "Verdict and target ownership match case annotations"
+      return True, "Verdict, gate outcomes, and target ownership match case annotations"
 
   - name: assessment_quality
     description: Rate whether the gate assessments are thorough and evidence-based

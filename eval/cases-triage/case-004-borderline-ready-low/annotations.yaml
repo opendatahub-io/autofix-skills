@@ -2,7 +2,7 @@ expected_verdict: "ready"
 expected_confidence: "low"
 expected_gates:
   gate1: pass
-  gate2: partial
+  gate2: pass
   gate3: pass
 notes: |
   Borderline case testing the calibration bias toward "ready".
@@ -11,9 +11,9 @@ notes: |
 
   The ticket has:
   - Gate 1 passes: repo URL present, specific behavior described
-  - Gate 2 is borderline: the race condition is described but the
-    exact fix path is uncertain (could be locking, caching, or
-    refactoring). Code is locatable but fix direction is ambiguous.
+  - Gate 2 passes with low confidence: the race condition is described
+    and the target owns the relevant code, but the exact fix path is
+    uncertain (could be locking, caching, or refactoring).
   - Gate 3 passes: this is a code-level bug, not a design or
     infrastructure issue
 
