@@ -6,7 +6,8 @@
   "required": [
     "verdict",
     "confidence",
-    "security_sensitive"
+    "security_sensitive",
+    "gate2"
   ],
   "properties": {
     "verdict": {
@@ -57,6 +58,11 @@
     },
     "gate2": {
       "type": "object",
+      "required": [
+        "code_locatability",
+        "fix_direction",
+        "target_repo_ownership"
+      ],
       "properties": {
         "code_locatability": {
           "type": "object",
@@ -71,6 +77,22 @@
         },
         "fix_direction": {
           "type": "object",
+          "properties": {
+            "pass": {
+              "type": "boolean"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "target_repo_ownership": {
+          "type": "object",
+          "description": "Whether the selected checkout plausibly owns a viable fix for the reported defect.",
+          "required": [
+            "pass",
+            "note"
+          ],
           "properties": {
             "pass": {
               "type": "boolean"
