@@ -41,7 +41,7 @@ dataset:
   schema: |
     Each case directory contains:
     - input.yaml: Minimal case metadata (ticket_key, mode).
-    - .autofix-context/ticket.json: Ticket data for the skill.
+    - .triage-context/ticket.json: Ticket data for the skill (older cases use .autofix-context/ticket.json).
     - AGENTS.md (optional): Project conventions for the skill to follow.
     - src/: Source and test files for the case.
     - pom.xml (optional): Maven project file (Java cases).
@@ -51,6 +51,7 @@ dataset:
   workspace:
     files:
       - .autofix-context
+      - .triage-context
       - AGENTS.md.fixture
       - src
       - pom.xml
@@ -125,7 +126,7 @@ judges:
       return True, f"Verdict '{v}' with confidence '{c}' are valid"
 
   - name: gate_consistency
-    description: Verify verdict follows the gate logic (Gate 1 fail -> needs_info; Gate 3 fail -> not_fixable; Gate 2 pass -> ready)
+    description: Verify verdict follows the gate logic, including target-repository ownership
     check: |
       import json
       modified = outputs.get("modified_files", {})
@@ -145,8 +146,7 @@ judges:
       )
       g2_pass = all(
           g2.get(k, {}).get("pass", False)
-          for k in ("code_locatability", "fix_direction")
-          if k in g2
+          for k in ("code_locatability", "fix_direction", "target_repo_ownership")
       )
       g3_pass = g3.get("pass", False)
 
@@ -160,6 +160,28 @@ judges:
           return False, f"Gate 2 failed but verdict is '{v}', expected 'needs_info'"
 
       return True, f"Verdict '{v}' is consistent with gate results"
+
+  - name: case_expectations
+    description: Verify the verdict and target ownership match case annotations
+    check: |
+      import json
+      modified = outputs.get("modified_files", {})
+      content = modified.get(".triage-verdict.json")
+      if not content:
+          return False, "No verdict file"
+      verdict = json.loads(content)
+
+      expected_verdict = annotations.get("expected_verdict")
+      if expected_verdict and verdict.get("verdict") != expected_verdict:
+          return False, f"Verdict '{verdict.get('verdict')}' does not match expected '{expected_verdict}'"
+
+      expected_ownership = annotations.get("expected_target_repo_ownership")
+      if expected_ownership is not None:
+          actual_ownership = verdict.get("gate2", {}).get("target_repo_ownership", {}).get("pass")
+          if actual_ownership is not expected_ownership:
+              return False, f"Target ownership '{actual_ownership}' does not match expected '{expected_ownership}'"
+
+      return True, "Verdict and target ownership match case annotations"
 
   - name: assessment_quality
     description: Rate whether the gate assessments are thorough and evidence-based
@@ -176,6 +198,7 @@ judges:
       3. Did the agent check for test coverage, build infrastructure, and agent docs?
       4. Is the reasoning clear and connected to the evidence found?
       5. Are risk factors identified and meaningful?
+      6. Did the agent distinguish the selected checkout from a repository that only deploys or consumes the affected code?
 
       Score:
       1 - No evidence of code exploration, generic assessments
@@ -194,7 +217,8 @@ judges:
       Evaluate based on the verdict type:
       - For "needs_info": Does the message reference the specific failed gate? Does it
         tell the opener exactly what information to provide? Is it structured with
-        "Needed" and "Helpful" sections?
+        "Needed" and "Helpful" sections? If the selected repository does not own
+        the defect, does it name the likely owner and request retargeting?
       - For "not_fixable": Does the message explain the specific Gate 3 category?
         Does it suggest what kind of human intervention is needed?
       - For "ready": Is message_to_opener empty or a brief confirmation?

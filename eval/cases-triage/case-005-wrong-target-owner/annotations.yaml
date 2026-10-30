@@ -1,0 +1,14 @@
+expected_verdict: "needs_info"
+expected_confidence: "high"
+expected_target_repo_ownership: false
+expected_gates:
+  gate1: pass
+  gate2: fail
+  gate3: pass
+notes: |
+  The selected model-service checkout only deploys the gateway-payload image.
+  The ticket's traceback identifies gateway-payload as the implementation
+  repository, and no model-service source or viable workaround is present.
+  Gate 2 target_repo_ownership fails even though both repos are in the same
+  organization. The feedback should name example-org/gateway-payload and ask
+  for the ticket or mapping to target that repository.

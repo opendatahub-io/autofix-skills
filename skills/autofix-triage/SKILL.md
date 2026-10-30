@@ -20,7 +20,7 @@ Read the ticket from `.triage-context/ticket.json` (written by the pipeline orch
 - What the reporter claims is broken (the symptom)
 - Where they believe the bug is (component, feature area, file paths)
 - Any error messages, log output, or stack traces
-- Any repo URLs mentioned (GitLab or GitHub)
+- Any repo URLs mentioned (GitLab or GitHub), distinguishing the selected target from other repositories named in the ticket
 - Steps to reproduce (if provided)
 - Expected vs. actual behavior (if stated)
 
@@ -40,7 +40,9 @@ If none of these files exist, explore the repository from scratch: check `go.mod
 
 When a target repo is available, context files are a map, not the territory. Use `Grep`, `Glob`, and `Read` to:
 
+- **Identify the selected target repository** -- Check the checked-out repository's origin (`git remote get-url origin` if shell access is available) against ticket URLs and component mapping context. A component mapping or a URL mentioned in the ticket identifies a candidate, not the owner of the defect.
 - **Locate the code area** referenced by the bug description. Verify it exists at the expected path. If the ticket mentions a function, CRD field, API endpoint, or error message, search for it.
+- **Check defect ownership** -- Trace the reported behavior to code that can be changed in this checkout. Distinguish an implementation from a repository that only deploys its image, configures it, or calls its API. Look for positive evidence of another owner (source paths, image provenance, package imports, stack traces, or ticket links); a failed search alone does not prove the defect lives elsewhere. Record the evidence and likely owning repository in `gate2.target_repo_ownership.note`.
 - **Confirm references are current** -- function names, API paths, CRD fields, or error messages in the ticket must match the actual codebase. Flag stale references.
 - **Check for test coverage** -- Look for tests near the bug area (`*_test.go`, `*.test.ts`, `test_*.py`, etc.). Repos with tests near the bug area are much more likely to produce a good autofix.
 - **Review recent git history** (if shell access is available) -- Run `git log --oneline -20 -- <path>` for the relevant code area. Recent refactors may explain the bug or indicate the area is actively changing. If shell access is not available, skip this sub-step.
@@ -72,17 +74,17 @@ When `security_sensitive` is true, the orchestrator will require human approval 
 
 The core question: "If the autofix agent were handed this ticket right now, would it produce a correct fix, or would it waste a cycle guessing wrong?"
 
-**Calibration: prefer ready when uncertain.** A wasted autofix cycle (the agent tries and fails) is far cheaper than a false rejection (a fixable bug sits untouched). When you are on the fence between `"ready"` and `"not_fixable"`, choose `"ready"` with `"confidence": "low"`. Reserve `"not_fixable"` for cases where you are genuinely confident the agent cannot succeed. The same bias applies at Gate 2: if code locatability is uncertain but plausible, pass the gate with a note rather than failing it.
+**Calibration: prefer ready when uncertain.** When the target repository plausibly owns the defect and there is no contrary evidence, choose `"ready"` with `"confidence": "low"` even if the exact code path is uncertain. Do not pass Gate 2 merely because a component maps to this repository. When concrete evidence points to a different owner and there is no viable fix in this checkout, follow the ownership rules in the reference instead of starting a resolve run here.
 
 See `references/rubric-and-schema.md` for the full gate rubric (pass/fail criteria with examples), verdict logic, JSON schema, field requirements, and actionable feedback templates.
 
 **Gate summary:**
 
 - **Gate 1 -- Can the Agent Start?** Repo URL exists and ticket states what is broken (not just "it's broken").
-- **Gate 2 -- Can the Agent Find and Fix It?** Code is locatable (file paths, error messages, component names) and correct behavior is unambiguous.
+- **Gate 2 -- Can the Agent Find and Fix It Here?** Code is locatable, correct behavior is unambiguous, and the selected target repository plausibly owns a viable fix. Record `target_repo_ownership` separately from code locatability.
 - **Gate 3 -- Should an Agent Fix This?** Not blocked by design decisions, infrastructure, external deps, runtime-only diagnosis, performance tuning, or non-code fixes.
 
-**Verdict logic:** Gate 1 fail -> `needs_info`; Gate 3 fail -> `not_fixable`; Gate 2 pass -> `ready`; else -> `needs_info`. Prefer `ready` with `"confidence": "low"` over `not_fixable` when uncertain.
+**Verdict logic:** Gate 1 fail -> `needs_info`; Gate 3 fail -> `not_fixable`; all Gate 2 checks pass -> `ready`; else -> `needs_info`. A known wrong target in the same organization requires retargeting, not a `ready` verdict for this checkout.
 
 ## Step 6: Write structured verdict to file
 
@@ -111,7 +113,7 @@ For `needs_info` verdicts, `message_to_opener` must reference the specific faile
 
 ## Gotchas
 
-- **Bias toward ready**: A wasted autofix cycle is cheaper than a missed fix. When on the fence, classify as `ready` with `"confidence": "low"` rather than `not_fixable`.
-- **Cross-repo is not systemic**: Fixes spanning multiple repos in the same GitHub/GitLab org are still `ready`, not `systemic_architectural`. Only use `not_fixable` when the dependency is genuinely outside the team's control.
+- **Bias toward ready**: If target ownership is plausible and no evidence points elsewhere, classify as `ready` with `"confidence": "low"` rather than `not_fixable`.
+- **Cross-repo is not automatically ready**: A sibling repository may be accessible to the team but the resolve run works in the selected checkout. If this checkout has no viable part of the fix, use `needs_info` and identify the likely owner. Reserve `systemic_architectural` for a truly external dependency with no target-repo workaround.
 - **No repo clone is not a hard stop**: If no repo is present in the working directory, set `repo_readiness` fields to `false` with a note and proceed to Step 4 -- do not abort the entire assessment.
-- **Bash scoping**: Bash is available for `git log` inspection (Step 3) and verdict validation via `write_json.py` (Step 5). Do not use it for general-purpose investigation or running repo build/test commands.
+- **Bash scoping**: Bash is available for `git remote get-url origin` and `git log` inspection (Step 3) and verdict validation via `write_json.py` (Step 6). Do not use it for general-purpose investigation or running repo build/test commands.

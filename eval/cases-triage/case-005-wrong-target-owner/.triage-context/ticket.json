@@ -1,0 +1,11 @@
+{
+  "key": "TRIAGE-005",
+  "summary": "Gateway request fails when the payload omits a model ID",
+  "description": "**Selected repository:** https://github.com/example-org/model-service (component mapping).\n\n**Symptom:** A request without model_id returns HTTP 500. The traceback points to gateway_payload/handler.py in https://github.com/example-org/gateway-payload, where parse_request reads payload['model_id'] without checking whether it exists.\n\n**Expected behavior:** Return HTTP 400 with a missing-model-ID error.\n\n**Repository evidence:** model-service deploys the example-org/gateway-payload image. There is no gateway_payload package in model-service.\n\n**Steps to reproduce:** Send POST /infer with JSON body {} to the deployed gateway.",
+  "components": [
+    {
+      "name": "Model Service"
+    }
+  ],
+  "issue_type": "Bug"
+}
